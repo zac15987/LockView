@@ -29,11 +29,21 @@ class ImageViewerViewModel : ViewModel() {
     }
     
     fun toggleLock() {
-        _state.update { it.copy(isLocked = !it.isLocked) }
+        val newLockState = !_state.value.isLocked
+        _state.update { 
+            it.copy(
+                isLocked = newLockState, 
+                toastMessage = if (newLockState) "Image locked" else "Image unlocked"
+            ) 
+        }
     }
     
     fun unlock() {
-        _state.update { it.copy(isLocked = false) }
+        _state.update { it.copy(isLocked = false, toastMessage = "Image unlocked") }
+    }
+    
+    fun clearToast() {
+        _state.update { it.copy(toastMessage = null) }
     }
     
     fun resetTransform() {

@@ -96,41 +96,22 @@ fun ImageViewerScreen(
             }
         }
         
-        // Lock indicator overlay
-        if (state.isLocked) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+        // Subtle lock indicator in top-right corner
+        if (state.isLocked && state.imageUri != null) {
+            Card(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                )
             ) {
-                Card(
-                    modifier = Modifier.padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Image Locked",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Triple tap, long press, or shake to unlock",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Image is locked",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
         }
         
@@ -158,6 +139,29 @@ fun ImageViewerScreen(
             }
         }
         
+        // Toast message for lock/unlock feedback
+        state.toastMessage?.let { message ->
+            LaunchedEffect(message) {
+                kotlinx.coroutines.delay(2000) // Show for 2 seconds
+                viewModel.clearToast()
+            }
+            
+            Card(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 50.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+                )
+            ) {
+                Text(
+                    text = message,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+        
         // FAB for image selection
         FloatingActionButton(
             onClick = {
@@ -174,8 +178,8 @@ fun ImageViewerScreen(
             Icon(Icons.Default.Add, contentDescription = "Select image")
         }
         
-        // Lock/Unlock button
-        if (state.imageUri != null) {
+        // Lock button (only when unlocked)
+        if (state.imageUri != null && !state.isLocked) {
             FloatingActionButton(
                 onClick = { viewModel.toggleLock() },
                 modifier = Modifier
@@ -183,8 +187,8 @@ fun ImageViewerScreen(
                     .padding(16.dp)
             ) {
                 Icon(
-                    imageVector = if (state.isLocked) Icons.Default.Lock else Icons.Outlined.Lock,
-                    contentDescription = if (state.isLocked) "Unlock" else "Lock"
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = "Lock image"
                 )
             }
         }

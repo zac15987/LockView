@@ -9,5 +9,6 @@ data class ImageViewerState(
     val offset: Offset = Offset.Zero,
     val isLocked: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val toastMessage: String? = null
 )
