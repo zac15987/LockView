@@ -49,6 +49,16 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    
+    // Image loading
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    
+    // Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
