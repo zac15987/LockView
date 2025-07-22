@@ -48,12 +48,7 @@ fun ImageViewerScreen(
     }
     
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .detectUnlockGestures(
-                isLocked = state.isLocked,
-                onUnlock = viewModel::unlock
-            )
+        modifier = Modifier.fillMaxSize()
     ) {
         // Image display
         if (state.imageUri != null) {
