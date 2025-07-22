@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LockView is an Android application designed to be a lockable image viewer. The project is currently in initial setup phase with basic Android Compose template code. The main functionality described in `LockView-requirement.md` has not been implemented yet.
+LockView is a fully functional Android application that provides a lockable image viewer with advanced gesture controls. The app uses modern Android architecture with Jetpack Compose and implements comprehensive zoom, pan, and unlock gesture functionality.
 
 **Key Details:**
 - Language: Kotlin
-- UI Framework: Jetpack Compose (Note: Requirements suggest View-based components)
+- UI Framework: Jetpack Compose with Material3
+- Architecture: MVVM with StateFlow
 - Build System: Gradle with Kotlin DSL
 - Package Name: `com.zac15987.lockview`
 - Min SDK: 24 (Android 7.0)
@@ -54,60 +55,87 @@ cmd.exe /c "gradlew uninstallDebug"     # Uninstall debug build from device
 
 **Note:** use cmd.exe /c "gradlew" or cmd.exe /c "gradlew.bat"
 
-## Architecture & Implementation Notes
+## Architecture Overview
 
-### Current State vs Requirements
-The project has a fundamental mismatch between its current setup and requirements:
-- **Current**: Jetpack Compose UI framework
-- **Required**: View-based components (PhotoView library)
+### MVVM Architecture with Compose
+The app follows modern Android architecture patterns:
+- **State Management**: `ImageViewerViewModel` with `StateFlow`
+- **UI Layer**: Declarative Compose UI with state-driven updates
+- **Data Layer**: `ImageViewerState` data class for centralized state
+- **Gesture Handling**: Custom Compose modifiers and gesture detectors
 
-### Required Dependencies Not Yet Added
-From `LockView-requirement.md`, these need to be added to `app/build.gradle.kts`:
-- Glide for image loading
-- PhotoView for zoom/pan functionality
-- Material Components
+### Key Dependencies
+- **Jetpack Compose**: UI framework with Material3
+- **Coil Compose**: Image loading and caching
+- **Accompanist Permissions**: Modern permission handling
+- **AndroidX Lifecycle**: ViewModel and state management
 
-### Missing Permissions
-Add to `AndroidManifest.xml`:
-- `READ_EXTERNAL_STORAGE`
-- `READ_MEDIA_IMAGES` (for Android 13+)
-
-### Core Features to Implement
-1. **Image Selection**: Using ActivityResultContracts or Intent.ACTION_PICK
-2. **Image Display**: PhotoView with zoom/pan gestures
-3. **Lock Mechanism**: Disable touch events with visual indicator
-4. **Unlock Methods**: Triple tap, long press, pattern, volume buttons, or shake
-
-### Suggested Package Structure
+### Package Structure
 ```
 com.zac15987.lockview/
 ├── MainActivity.kt
+├── data/
+│   └── ImageViewerState.kt          # State data model
 ├── ui/
-│   ├── LockablePhotoView.kt
-│   └── UnlockGestureDetector.kt
+│   ├── components/
+│   │   └── ZoomableImage.kt         # Custom zoomable image component
+│   ├── gestures/
+│   │   └── UnlockGestureDetector.kt # Unlock gesture detection
+│   └── screens/
+│       └── ImageViewerScreen.kt     # Main UI screen
 ├── utils/
-│   ├── ImageLoader.kt
-│   └── PermissionHelper.kt
-└── models/
-    └── ImageState.kt
+│   └── PermissionHandler.kt         # Permission utilities
+└── viewmodel/
+    └── ImageViewerViewModel.kt      # State and business logic
 ```
 
-## Key Implementation Considerations
+## Core Features (Fully Implemented)
+
+### Image Handling
+- Image selection using `ActivityResultContracts.GetContent()`
+- Coil-based image loading with error handling and loading states
+- Support for various image formats
+
+### Zoom and Pan Controls
+- Pinch zoom with scale constraints (0.5x to 5x)
+- Pan gestures with boundary detection
+- Double-tap zoom toggle (fit-to-screen vs 2x zoom)
+- Smooth animations and state persistence
+
+### Lock Mechanism
+- Visual lock indicator with Material3 design
+- Complete gesture disabling when locked
+- Lock state persists through configuration changes
+
+### Unlock Methods (All Implemented)
+- **Triple Tap**: Three rapid taps to unlock (`ui/gestures/UnlockGestureDetector.kt:85`)
+- **Long Press**: 2-second hold to unlock (`ui/gestures/UnlockGestureDetector.kt:94`)
+- **Shake to Unlock**: Accelerometer-based shake detection (`ui/gestures/UnlockGestureDetector.kt:103`)
+- **Volume Button Unlock**: Placeholder implementation ready for completion
 
 ### State Management
-- Save zoom level, pan position, and lock state
-- Handle configuration changes (rotation)
-- Use `onSaveInstanceState()` and `onRestoreInstanceState()`
+- Zoom level and pan position persistence
+- Lock state maintained across rotations
+- Configuration change handling via ViewModel
 
-### Gesture Requirements
-- Pinch zoom: 0.5x to 5x scale
-- Double tap: Toggle fit/2x zoom
-- Lock state must disable all image interactions
-- Multiple unlock methods should be implemented
+## Development Notes
 
-### Testing Focus Areas
-- Various screen sizes and densities
-- Gesture recognition accuracy
-- State persistence
-- Different image formats and sizes
-- Permission handling edge cases
+### Testing Areas Needing Expansion
+- Gesture recognition accuracy tests
+- State persistence validation
+- Image loading error scenarios
+- Permission edge cases
+
+### Volume Button Unlock Implementation
+The volume button unlock is partially implemented in `UnlockGestureDetector.kt:114` but requires Activity-level key event handling in `MainActivity.kt`. Use `onKeyDown()` override to detect `KEYCODE_VOLUME_UP` or `KEYCODE_VOLUME_DOWN`.
+
+### Permissions Configuration
+Permissions are properly configured in `AndroidManifest.xml`:
+- `READ_EXTERNAL_STORAGE` (for Android 12 and below)
+- `READ_MEDIA_IMAGES` (for Android 13+)
+
+### State Flow Architecture
+The app uses modern reactive state management:
+- `ImageViewerViewModel.uiState` exposes `StateFlow<ImageViewerState>`
+- UI automatically recomposes when state changes
+- Unidirectional data flow with clear action methods
