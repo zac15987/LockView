@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zac15987.lockview.ui.components.ZoomableImage
-import com.zac15987.lockview.ui.gestures.detectUnlockGestures
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
