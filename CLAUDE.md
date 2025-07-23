@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LockView is a fully functional Android application that provides a lockable image viewer with advanced gesture controls. The app uses modern Android architecture with Jetpack Compose and implements comprehensive zoom, pan, and unlock gesture functionality.
+LockView is a fully functional Android application that provides a lockable image viewer with advanced gesture controls. The app uses modern Android architecture with Jetpack Compose and implements comprehensive zoom, pan, and unlock functionality.
 
 **Key Details:**
 - Language: Kotlin
@@ -79,8 +79,6 @@ com.zac15987.lockview/
 ├── ui/
 │   ├── components/
 │   │   └── ZoomableImage.kt         # Custom zoomable image component
-│   ├── gestures/
-│   │   └── UnlockGestureDetector.kt # Unlock gesture detection
 │   └── screens/
 │       └── ImageViewerScreen.kt     # Main UI screen
 ├── utils/
@@ -89,7 +87,7 @@ com.zac15987.lockview/
     └── ImageViewerViewModel.kt      # State and business logic
 ```
 
-## Core Features (Fully Implemented)
+## Core Features
 
 ### Image Handling
 - Image selection using `ActivityResultContracts.GetContent()`
@@ -97,7 +95,7 @@ com.zac15987.lockview/
 - Support for various image formats
 
 ### Zoom and Pan Controls
-- Pinch zoom with scale constraints (0.5x to 5x)
+- Pinch zoom with scale constraints
 - Pan gestures with boundary detection
 - Double-tap zoom toggle (fit-to-screen vs 2x zoom)
 - Smooth animations and state persistence
@@ -107,11 +105,8 @@ com.zac15987.lockview/
 - Complete gesture disabling when locked
 - Lock state persists through configuration changes
 
-### Unlock Methods (All Implemented)
-- **Triple Tap**: Three rapid taps to unlock (`ui/gestures/UnlockGestureDetector.kt:85`)
-- **Long Press**: 2-second hold to unlock (`ui/gestures/UnlockGestureDetector.kt:94`)
-- **Shake to Unlock**: Accelerometer-based shake detection (`ui/gestures/UnlockGestureDetector.kt:103`)
-- **Volume Button Unlock**: Placeholder implementation ready for completion
+### Unlock Methods
+- **Phone Screen Unlock**: Automatic unlock when device screen is unlocked
 
 ### State Management
 - Zoom level and pan position persistence
@@ -125,9 +120,6 @@ com.zac15987.lockview/
 - State persistence validation
 - Image loading error scenarios
 - Permission edge cases
-
-### Volume Button Unlock Implementation
-The volume button unlock is partially implemented in `UnlockGestureDetector.kt:114` but requires Activity-level key event handling in `MainActivity.kt`. Use `onKeyDown()` override to detect `KEYCODE_VOLUME_UP` or `KEYCODE_VOLUME_DOWN`.
 
 ### Permissions Configuration
 Permissions are properly configured in `AndroidManifest.xml`:
