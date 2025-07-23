@@ -159,17 +159,30 @@ fun ImageViewerScreen(
         // FAB for image selection
         FloatingActionButton(
             onClick = {
-                if (hasImagePermission(context)) {
-                    imagePicker.launch("image/*")
-                } else {
-                    showPermissionDeniedDialog = true
+                if (!state.isLocked) {
+                    if (hasImagePermission(context)) {
+                        imagePicker.launch("image/*")
+                    } else {
+                        showPermissionDeniedDialog = true
+                    }
                 }
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
+            containerColor = if (state.isLocked) 
+                MaterialTheme.colorScheme.surfaceVariant 
+            else 
+                MaterialTheme.colorScheme.primaryContainer
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Select image")
+            Icon(
+                Icons.Default.Add, 
+                contentDescription = "Select image",
+                tint = if (state.isLocked)
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                else
+                    MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
         
         // Lock button (only when unlocked)
