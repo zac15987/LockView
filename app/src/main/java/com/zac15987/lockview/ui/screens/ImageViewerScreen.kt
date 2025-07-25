@@ -150,8 +150,12 @@ fun ImageViewerScreen(
             
             Card(
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 50.dp),
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        bottom = if (state.error != null) 120.dp else 80.dp,
+                        start = 24.dp,
+                        end = 24.dp
+                    ),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
                 )
@@ -197,7 +201,7 @@ fun ImageViewerScreen(
         // Lock button (only when unlocked)
         if (state.imageUri != null && !state.isLocked) {
             FloatingActionButton(
-                onClick = { viewModel.toggleLock() },
+                onClick = { viewModel.lock() },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(16.dp)

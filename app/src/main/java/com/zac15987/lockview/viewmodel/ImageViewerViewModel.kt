@@ -37,11 +37,10 @@ class ImageViewerViewModel : ViewModel() {
             _state.value.updateOffset(offset)
         }
     }
-    
-    
+
     fun toggleLock() {
         val newLockState = !_state.value.isLocked
-        _state.value.isLocked = newLockState
+        _state.value.isLocked = true
         _state.value.toastMessage = if (newLockState) {
             "Image locked 🔒\nLock and unlock your device screen to unlock the image"
         } else {
@@ -49,13 +48,14 @@ class ImageViewerViewModel : ViewModel() {
         }
     }
     
-    fun unlock(isAutomatic: Boolean = false) {
+    fun lock() {
+        _state.value.isLocked = true
+        _state.value.toastMessage = "Image locked 🔒\nLock and unlock your device screen to unlock the image"
+    }
+    
+    fun unlock() {
         _state.value.isLocked = false
-        _state.value.toastMessage = if (isAutomatic) {
-            "Image unlocked 🔓\nUnlocked automatically when you unlocked your device"
-        } else {
-            "Image unlocked 🔓"
-        }
+        _state.value.toastMessage = "Image unlocked 🔓"
     }
     
     fun clearToast() {
