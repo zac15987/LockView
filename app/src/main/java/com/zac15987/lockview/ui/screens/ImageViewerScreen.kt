@@ -142,7 +142,9 @@ fun ImageViewerScreen(
         // Toast message for lock/unlock feedback
         state.toastMessage?.let { message ->
             LaunchedEffect(message) {
-                kotlinx.coroutines.delay(2000) // Show for 2 seconds
+                // Show longer duration for messages with tips (containing newlines)
+                val duration = if (message.contains('\n')) 4000L else 2000L
+                kotlinx.coroutines.delay(duration)
                 viewModel.clearToast()
             }
             

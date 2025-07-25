@@ -42,12 +42,20 @@ class ImageViewerViewModel : ViewModel() {
     fun toggleLock() {
         val newLockState = !_state.value.isLocked
         _state.value.isLocked = newLockState
-        _state.value.toastMessage = if (newLockState) "Image locked" else "Image unlocked"
+        _state.value.toastMessage = if (newLockState) {
+            "Image locked 🔒\nLock and unlock your device screen to unlock the image"
+        } else {
+            "Image unlocked 🔓"
+        }
     }
     
-    fun unlock() {
+    fun unlock(isAutomatic: Boolean = false) {
         _state.value.isLocked = false
-        _state.value.toastMessage = "Image unlocked"
+        _state.value.toastMessage = if (isAutomatic) {
+            "Image unlocked 🔓\nUnlocked automatically when you unlocked your device"
+        } else {
+            "Image unlocked 🔓"
+        }
     }
     
     fun clearToast() {
