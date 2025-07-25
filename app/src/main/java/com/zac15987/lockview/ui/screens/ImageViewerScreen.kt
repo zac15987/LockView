@@ -92,8 +92,8 @@ fun ImageViewerScreen(
         if (state.isLocked && state.imageUri != null) {
             Card(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp),
+                    .align(Alignment.TopStart)
+                    .padding(top = 32.dp, start = 8.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
                 )
