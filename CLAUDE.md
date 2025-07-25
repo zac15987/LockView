@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LockView is a fully functional Android application that provides a lockable image viewer with advanced gesture controls. The app uses modern Android architecture with Jetpack Compose and implements comprehensive zoom, pan, and unlock functionality.
+LockView is a fully functional Android application that provides a lockable image viewer with advanced gesture controls, theme customization, and automatic device-unlock integration. The app uses modern Android architecture with Jetpack Compose and implements comprehensive zoom, pan, unlock functionality, and persistent user preferences.
 
 **Key Details:**
 - Language: Kotlin
 - UI Framework: Jetpack Compose with Material3
-- Architecture: MVVM with StateFlow
+- Architecture: MVVM with StateFlow + Repository Pattern
 - Build System: Gradle with Kotlin DSL
 - Package Name: `com.zac15987.lockview`
 - Min SDK: 24 (Android 7.0)
@@ -69,22 +69,38 @@ The app follows modern Android architecture patterns:
 - **Coil Compose**: Image loading and caching
 - **Accompanist Permissions**: Modern permission handling
 - **AndroidX Lifecycle**: ViewModel and state management
+- **DataStore Preferences**: Persistent user preferences (theme settings)
+- **Material3 Dynamic Color**: Adaptive theming for Android 12+
 
 ### Package Structure
 ```
 com.zac15987.lockview/
-├── MainActivity.kt
+├── MainActivity.kt                  # Main activity with device unlock integration
 ├── data/
-│   └── ImageViewerState.kt          # State data model
+│   ├── ImageViewerState.kt         # Image viewer state data model
+│   ├── Bounds.kt                   # Boundary calculation utilities
+│   └── theme/
+│       ├── ThemePreference.kt      # Theme preference enum
+│       └── ThemeRepository.kt      # Theme persistence with DataStore
 ├── ui/
 │   ├── components/
-│   │   └── ZoomableImage.kt         # Custom zoomable image component
-│   └── screens/
-│       └── ImageViewerScreen.kt     # Main UI screen
+│   │   ├── ImageViewer.kt          # Advanced image viewer component
+│   │   ├── ZoomableImage.kt        # Zoomable image with gesture handling
+│   │   ├── TransformGestureDetector.kt # Custom gesture detection
+│   │   ├── AboutDialog.kt          # App information dialog
+│   │   └── LicensesDialog.kt       # Open source licenses
+│   ├── screens/
+│   │   └── ImageViewerScreen.kt    # Main UI screen with theme picker
+│   └── theme/
+│       ├── Theme.kt                # Material3 theme with dynamic theming
+│       ├── Color.kt                # Color palette definitions
+│       └── Type.kt                 # Typography definitions
 ├── utils/
-│   └── PermissionHandler.kt         # Permission utilities
+│   └── PermissionHandler.kt        # Permission utilities
 └── viewmodel/
-    └── ImageViewerViewModel.kt      # State and business logic
+    ├── ImageViewerViewModel.kt     # Image state and business logic
+    ├── ThemeViewModel.kt           # Theme state management
+    └── ThemeViewModelFactory.kt    # Theme ViewModel factory
 ```
 
 ## Core Features
@@ -104,22 +120,63 @@ com.zac15987.lockview/
 - Visual lock indicator with Material3 design
 - Complete gesture disabling when locked
 - Lock state persists through configuration changes
+- Enhanced toast messages with usage tips
 
 ### Unlock Methods
-- **Phone Screen Unlock**: Automatic unlock when device screen is unlocked
+- **Device Screen Unlock**: Automatic unlock via broadcast receivers (`ACTION_USER_PRESENT`)
+- **App Resume Unlock**: KeyguardManager integration for seamless unlocking
+
+### Theme System
+- **Light/Dark/System themes**: User-configurable theme preference
+- **Dynamic theming**: Material You integration on Android 12+
+- **DataStore persistence**: Theme settings survive app restarts
+- **Theme-aware components**: All UI elements adapt to theme changes
 
 ### State Management
 - Zoom level and pan position persistence
 - Lock state maintained across rotations
 - Configuration change handling via ViewModel
+- Repository pattern for theme preferences with DataStore
+
+## Architecture Patterns
+
+### Repository Pattern Implementation
+The app implements repository pattern for data persistence:
+- **ThemeRepository**: Uses DataStore for theme preference persistence
+- **Centralized state access**: ViewModels interact with repositories, not direct storage
+- **Reactive updates**: Repository exposes `Flow` for automatic UI updates
+
+### ViewModel Factory Pattern
+Custom ViewModel factories handle dependency injection:
+- **ThemeViewModelFactory**: Injects ThemeRepository into ThemeViewModel
+- **Proper lifecycle management**: Ensures ViewModels receive required dependencies
+- **Testability**: Facilitates dependency injection for testing
+
+### Device Integration Patterns
+**Broadcast Receiver Integration**:
+- `ACTION_USER_PRESENT`: Detects device unlock events
+- `ACTION_SCREEN_OFF`: Tracks device lock state
+- **KeyguardManager**: Checks device lock status on app resume
+
+**System Integration Flow**:
+1. Device locks → `ACTION_SCREEN_OFF` → Set `wasDeviceLocked = true`
+2. Device unlocks → `ACTION_USER_PRESENT` → Call `viewModel.unlock(isAutomatic = true)`
+3. App resume with unlocked device → KeyguardManager check → Automatic unlock
+
+### Toast Message System
+**Context-aware messaging**:
+- **Lock messages**: Include instructional tips about device unlock
+- **Unlock messages**: Differentiate manual vs automatic unlock
+- **Smart duration**: Longer display time for instructional content
+- **Positioning**: Bottom-centered with collision avoidance
 
 ## Development Notes
 
-### Testing Areas Needing Expansion
-- Gesture recognition accuracy tests
-- State persistence validation
-- Image loading error scenarios
-- Permission edge cases
+### Modern Android Practices
+- **Jetpack Compose**: Fully declarative UI with no XML layouts
+- **Material3**: Latest Material Design with dynamic theming
+- **StateFlow**: Reactive state management with automatic UI updates
+- **DataStore**: Type-safe preference storage replacing SharedPreferences
 
 ### Permissions Configuration
 Permissions are properly configured in `AndroidManifest.xml`:
@@ -128,6 +185,7 @@ Permissions are properly configured in `AndroidManifest.xml`:
 
 ### State Flow Architecture
 The app uses modern reactive state management:
-- `ImageViewerViewModel.uiState` exposes `StateFlow<ImageViewerState>`
+- `ImageViewerViewModel.state` exposes `StateFlow<ImageViewerState>`
+- `ThemeViewModel.themePreference` exposes `StateFlow<ThemePreference>`
 - UI automatically recomposes when state changes
 - Unidirectional data flow with clear action methods
