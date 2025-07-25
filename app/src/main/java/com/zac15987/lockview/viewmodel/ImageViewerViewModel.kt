@@ -71,7 +71,12 @@ class ImageViewerViewModel : ViewModel() {
     }
     
     fun setImageSize(width: Float, height: Float) {
-        _state.value.setImageSize(width, height)
+        viewModelScope.launch {
+            _state.value.setImageSize(width, height)
+            // After setting image size, scale to fit screen
+            _state.value.updateScale(_state.value.minScale)
+            _state.value.updateOffset(Offset.Zero)
+        }
     }
     
     // Drag functionality
