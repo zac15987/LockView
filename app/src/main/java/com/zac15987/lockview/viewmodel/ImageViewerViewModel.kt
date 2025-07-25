@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zac15987.lockview.R
 import com.zac15987.lockview.data.ImageViewerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,24 +39,24 @@ class ImageViewerViewModel : ViewModel() {
         }
     }
 
-    fun toggleLock() {
+    fun toggleLock(lockedMessage: String, unlockedMessage: String) {
         val newLockState = !_state.value.isLocked
-        _state.value.isLocked = true
+        _state.value.isLocked = newLockState
         _state.value.toastMessage = if (newLockState) {
-            "Image locked 🔒\nLock and unlock your device screen to unlock the image"
+            lockedMessage
         } else {
-            "Image unlocked 🔓"
+            unlockedMessage
         }
     }
     
-    fun lock() {
+    fun lock(lockedMessage: String) {
         _state.value.isLocked = true
-        _state.value.toastMessage = "Image locked 🔒\nLock and unlock your device screen to unlock the image"
+        _state.value.toastMessage = lockedMessage
     }
     
-    fun unlock() {
+    fun unlock(unlockedMessage: String) {
         _state.value.isLocked = false
-        _state.value.toastMessage = "Image unlocked 🔓"
+        _state.value.toastMessage = unlockedMessage
     }
     
     fun clearToast() {

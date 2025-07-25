@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.zac15987.lockview.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,6 +44,9 @@ fun ImageViewerScreen(
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    
+    val failedToLoadImageText = stringResource(R.string.failed_to_load_image)
+    val imageLockedMessage = stringResource(R.string.image_locked_message)
     
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -73,7 +78,7 @@ fun ImageViewerScreen(
                     viewModel.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
                     viewModel.setLoading(false)
                 },
-                onError = { viewModel.setError("Failed to load image") }
+                onError = { viewModel.setError(failedToLoadImageText) }
             )
         } else {
             // Empty state
@@ -83,13 +88,13 @@ fun ImageViewerScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "No image selected",
+                    text = stringResource(R.string.no_image_selected),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Tap the + button to select an image",
+                    text = stringResource(R.string.tap_to_select_image),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -108,7 +113,7 @@ fun ImageViewerScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Image is locked",
+                    contentDescription = stringResource(R.string.image_is_locked),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(8.dp)
                 )
@@ -131,7 +136,7 @@ fun ImageViewerScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 action = {
                     TextButton(onClick = { viewModel.setError(null) }) {
-                        Text("Dismiss")
+                        Text(stringResource(R.string.dismiss))
                     }
                 }
             ) {
@@ -190,7 +195,7 @@ fun ImageViewerScreen(
         ) {
             Icon(
                 Icons.Default.Add, 
-                contentDescription = "Select image",
+                contentDescription = stringResource(R.string.select_image),
                 tint = if (state.isLocked)
                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 else
@@ -201,14 +206,14 @@ fun ImageViewerScreen(
         // Lock button (only when unlocked)
         if (state.imageUri != null && !state.isLocked) {
             FloatingActionButton(
-                onClick = { viewModel.lock() },
+                onClick = { viewModel.lock(imageLockedMessage) },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Lock,
-                    contentDescription = "Lock image"
+                    contentDescription = stringResource(R.string.lock_image)
                 )
             }
         }
@@ -224,7 +229,7 @@ fun ImageViewerScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Menu",
+                    contentDescription = stringResource(R.string.menu),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -234,14 +239,14 @@ fun ImageViewerScreen(
                 onDismissRequest = { showMenu = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Theme") },
+                    text = { Text(stringResource(R.string.theme)) },
                     onClick = {
                         showMenu = false
                         showThemeDialog = true
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("About") },
+                    text = { Text(stringResource(R.string.about)) },
                     onClick = {
                         showMenu = false
                         showAboutDialog = true
@@ -274,7 +279,7 @@ fun ImageViewerScreen(
         
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
-            title = { Text("Choose Theme") },
+            title = { Text(stringResource(R.string.choose_theme)) },
             text = {
                 Column {
                     ThemePreference.values().forEach { theme ->
@@ -296,14 +301,14 @@ fun ImageViewerScreen(
                                 }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(theme.displayName)
+                            Text(stringResource(theme.displayNameResId))
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -313,11 +318,11 @@ fun ImageViewerScreen(
     if (showPermissionDeniedDialog) {
         AlertDialog(
             onDismissRequest = { showPermissionDeniedDialog = false },
-            title = { Text("Permission Required") },
-            text = { Text("This app needs permission to access your images. Please grant the permission in Settings.") },
+            title = { Text(stringResource(R.string.permission_required)) },
+            text = { Text(stringResource(R.string.permission_message)) },
             confirmButton = {
                 TextButton(onClick = { showPermissionDeniedDialog = false }) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             }
         )

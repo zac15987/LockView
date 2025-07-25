@@ -31,7 +31,9 @@ class MainActivity : ComponentActivity() {
             when (intent?.action) {
                 Intent.ACTION_USER_PRESENT -> {
                     // Device was unlocked by user
-                    viewModel?.unlock()
+                    context?.let {
+                        viewModel?.unlock(it.getString(R.string.image_unlocked_message))
+                    }
                 }
                 Intent.ACTION_SCREEN_OFF -> {
                     wasDeviceLocked = true
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
         // Check if coming back from device lock screen
         if (wasDeviceLocked && !keyguardManager.isKeyguardLocked) {
             // Device was locked but now is unlocked - unlock the image too
-            viewModel?.unlock()
+            viewModel?.unlock(getString(R.string.image_unlocked_message))
             wasDeviceLocked = false
         }
     }

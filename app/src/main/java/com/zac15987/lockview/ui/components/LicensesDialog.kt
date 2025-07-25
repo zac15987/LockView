@@ -12,7 +12,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
+import com.zac15987.lockview.R
 
 @Composable
 fun AboutDialog(
@@ -23,7 +25,7 @@ fun AboutDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(
-                text = "LockView",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium
             )
         },
@@ -33,25 +35,25 @@ fun AboutDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Version 1.0.0",
+                    text = stringResource(R.string.app_version),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "A secure image viewer with lock functionality",
+                    text = stringResource(R.string.app_description),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = onShowLicenses) {
-                    Text("Open Source Licenses")
+                    Text(stringResource(R.string.open_source_licenses))
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         }
     )
@@ -81,7 +83,7 @@ fun LicensesDialog(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Open Source Licenses",
+                    text = stringResource(R.string.open_source_licenses),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -98,29 +100,23 @@ fun LicensesDialog(
                             .verticalScroll(rememberScrollState())
                     ) {
                         LicenseItem(
-                            libraryName = "ImageViewer for Jetpack Compose",
-                            copyright = "Copyright (c) 2024 ZhangKe (0xZhangKe)",
-                            url = "https://github.com/0xZhangKe/ImageViewer",
-                            license = "Apache License, Version 2.0"
+                            libraryName = stringResource(R.string.imageviewer_library_name),
+                            copyright = stringResource(R.string.imageviewer_copyright),
+                            url = stringResource(R.string.imageviewer_url),
+                            license = stringResource(R.string.apache_license_2)
                         )
                         
                         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         
                         Text(
-                            text = "Modifications",
+                            text = stringResource(R.string.modifications),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         
                         Text(
-                            text = """The following components were adapted from the ImageViewer library:
-• TransformGestureDetector - Advanced gesture detection
-• Bounds - Boundary constraint management
-• Enhanced ImageViewerState - Animation support
-• ImageViewer component - Core viewer functionality
-
-These components have been modified to integrate with LockView's lock functionality and UI requirements.""",
+                            text = stringResource(R.string.modifications_detail),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -128,21 +124,14 @@ These components have been modified to integrate with LockView's lock functional
                         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         
                         Text(
-                            text = "Additional Libraries",
+                            text = stringResource(R.string.additional_libraries),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         
                         Text(
-                            text = """This app also uses the following libraries:
-• AndroidX Core libraries
-• Jetpack Compose
-• Material3 Design Components
-• Coil Image Loading
-• Accompanist Permissions
-
-All are licensed under Apache License 2.0""",
+                            text = stringResource(R.string.additional_libraries_detail),
                             style = MaterialTheme.typography.bodySmall
                         )
                         
@@ -151,22 +140,14 @@ All are licensed under Apache License 2.0""",
                         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         
                         Text(
-                            text = "LockView App License",
+                            text = stringResource(R.string.lockview_app_license),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         
                         Text(
-                            text = """LockView is licensed under the MIT License.
-
-Copyright (c) 2025 LockView
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.""",
+                            text = stringResource(R.string.lockview_license_detail),
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = FontFamily.Monospace
                         )
@@ -180,7 +161,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
-                        Text("Close")
+                        Text(stringResource(R.string.close))
                     }
                 }
             }

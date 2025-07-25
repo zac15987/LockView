@@ -13,10 +13,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
+import com.zac15987.lockview.R
 import com.zac15987.lockview.data.ImageViewerState
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -42,7 +44,7 @@ fun ImageViewer(
                 .data(imageUri)
                 .crossfade(true)
                 .build(),
-            contentDescription = "Zoomable image",
+            contentDescription = stringResource(R.string.zoomable_image),
             modifier = Modifier
                 .fillMaxSize()
                 .onGloballyPositioned { coordinates ->
