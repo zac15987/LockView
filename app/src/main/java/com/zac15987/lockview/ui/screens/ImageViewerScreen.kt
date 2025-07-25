@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +19,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
+import com.zac15987.lockview.ui.components.LicensesDialog
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
@@ -30,6 +33,9 @@ fun ImageViewerScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    var showLicensesDialog by remember { mutableStateOf(false) }
     
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -191,6 +197,53 @@ fun ImageViewerScreen(
                 )
             }
         }
+        
+        // Menu button (top-right corner)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 24.dp, end = 8.dp)
+        ) {
+            IconButton(
+                onClick = { showMenu = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Menu",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("About") },
+                    onClick = {
+                        showMenu = false
+                        showAboutDialog = true
+                    }
+                )
+            }
+        }
+    }
+    
+    // Dialogs
+    if (showAboutDialog) {
+        AboutDialog(
+            onDismissRequest = { showAboutDialog = false },
+            onShowLicenses = {
+                showAboutDialog = false
+                showLicensesDialog = true
+            }
+        )
+    }
+    
+    if (showLicensesDialog) {
+        LicensesDialog(
+            onDismissRequest = { showLicensesDialog = false }
+        )
     }
     
     // Permission denied dialog
