@@ -12,8 +12,39 @@ object LocaleHelper {
     
     fun setLocale(context: Context, languagePreference: LanguagePreference): Context {
         return when (languagePreference) {
-            LanguagePreference.SYSTEM -> context
+            LanguagePreference.SYSTEM -> resetToSystemLocale(context)
             else -> updateResources(context, languagePreference.localeCode)
+        }
+    }
+    
+    private fun resetToSystemLocale(context: Context): Context {
+        // Get the actual system locale from the base application context
+        val systemLocale = getSystemLocale(context)
+        
+        // Reset to system default
+        Locale.setDefault(systemLocale)
+        
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+, clear application locales to use system default
+            context.getSystemService(LocaleManager::class.java)?.applicationLocales = LocaleList.getEmptyLocaleList()
+            context
+        } else {
+            // For older versions, create context with system locale
+            val configuration = Configuration(context.resources.configuration)
+            configuration.setLocale(systemLocale)
+            context.createConfigurationContext(configuration)
+        }
+    }
+    
+    private fun getSystemLocale(context: Context): Locale {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Get the actual system locale from system resources
+            val systemResources = android.content.res.Resources.getSystem()
+            systemResources.configuration.locales.get(0)
+        } else {
+            @Suppress("DEPRECATION")
+            // For older versions, get from system resources
+            android.content.res.Resources.getSystem().configuration.locale
         }
     }
     
