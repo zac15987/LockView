@@ -116,7 +116,9 @@ class ImageViewerState(
     
     // Drag functionality
     suspend fun drag(dragAmount: Offset) {
-        val newOffset = offset + dragAmount
+        // Adjust drag amount by scale to keep consistent pan speed
+        val adjustedDragAmount = dragAmount * scale
+        val newOffset = offset + adjustedDragAmount
         updateOffset(newOffset)
     }
     
