@@ -1,22 +1,127 @@
 package com.zac15987.lockview.ui.components
 
-import androidx.compose.foundation.gestures.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.*
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
+import com.zac15987.lockview.data.ImageViewerState
 import kotlinx.coroutines.launch
-import kotlin.math.*
+import kotlin.math.abs
 
+@Composable
+fun ImageViewer(
+    state: ImageViewerState,
+    imageUri: Any?,
+    onLoading: () -> Unit,
+    onSuccess: (IntSize) -> Unit,
+    onError: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(imageUri)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Zoomable image",
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { coordinates ->
+                    state.layoutSize = coordinates.size
+                }
+                .graphicsLayer {
+                    scaleX = state.scale
+                    scaleY = state.scale
+                    translationX = state.offset.x
+                    translationY = state.offset.y
+                }
+                .pointerInput(state.isLocked) {
+                    if (!state.isLocked) {
+                        detectZoom { centroid, zoom ->
+                            coroutineScope.launch {
+                                val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
+                                
+                                // Calculate new offset to zoom towards centroid
+                                val centerOffset = Offset(size.width / 2f, size.height / 2f)
+                                val centroidOffset = centroid - centerOffset
+                                val scaleDelta = newScale - state.scale
+                                val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
+                                
+                                state.updateScale(newScale)
+                                state.updateOffset(newOffset)
+                            }
+                        }
+                    }
+                }
+                .pointerInput(state.isLocked) {
+                    if (!state.isLocked) {
+                        detectDragGestures { _, dragAmount ->
+                            coroutineScope.launch {
+                                state.drag(dragAmount)
+                            }
+                        }
+                    }
+                }
+                .pointerInput(state.isLocked) {
+                    if (!state.isLocked) {
+                        detectTapGestures(
+                            onDoubleTap = { tapOffset ->
+                                coroutineScope.launch {
+                                    if (abs(state.scale - state.minScale) < 0.1f) {
+                                        // Zoom in to double tap location
+                                        state.animateToBig(tapOffset)
+                                    } else {
+                                        // Zoom out to standard view
+                                        state.animateToStandard()
+                                    }
+                                }
+                            }
+                        )
+                    }
+                },
+            contentScale = ContentScale.Fit,
+            onLoading = { onLoading() },
+            onSuccess = { result ->
+                when (result) {
+                    is AsyncImagePainter.State.Success -> {
+                        val drawable = result.result.drawable
+                        val imageSize = IntSize(drawable.intrinsicWidth, drawable.intrinsicHeight)
+                        state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                        onSuccess(imageSize)
+                    }
+                    else -> {
+                        // Fallback size
+                        val imageSize = IntSize(1000, 1000)
+                        state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                        onSuccess(imageSize)
+                    }
+                }
+            },
+            onError = { onError() }
+        )
+    }
+}
+
+// Backward compatibility function
 @Composable
 fun ZoomableImage(
     imageUri: Any?,
@@ -31,82 +136,37 @@ fun ZoomableImage(
     onError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val density = LocalDensity.current
-    var containerSize by remember { mutableStateOf(IntSize.Zero) }
-    var imageSize by remember { mutableStateOf(IntSize.Zero) }
-    val coroutineScope = rememberCoroutineScope()
-    
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        val maxWidth = with(density) { maxWidth.toPx() }
-        val maxHeight = with(density) { maxHeight.toPx() }
-        containerSize = IntSize(maxWidth.toInt(), maxHeight.toInt())
-        
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(imageUri)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Zoomable image",
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { coordinates ->
-                    containerSize = coordinates.size
-                }
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offset.x
-                    translationY = offset.y
-                }
-                .pointerInput(isLocked, scale, offset) {
-                    if (!isLocked) {
-                        detectTransformGestures(
-                            panZoomLock = false
-                        ) { centroid, pan, zoom, _ ->
-                            // Improved zoom sensitivity with exponential scaling
-                            val zoomFactor = if (zoom > 1f) {
-                                1f + (zoom - 1f) * 1.5f // Make zoom in more sensitive
-                            } else {
-                                1f - (1f - zoom) * 1.2f // Make zoom out more sensitive
-                            }
-                            
-                            val newScale = (scale * zoomFactor).coerceIn(0.5f, 15f)
-                            
-                            // Calculate proper pan boundaries based on scaled image size
-                            val scaledWidth = size.width * newScale
-                            val scaledHeight = size.height * newScale
-                            
-                            val maxOffsetX = max(0f, (scaledWidth - size.width) / 2f)
-                            val maxOffsetY = max(0f, (scaledHeight - size.height) / 2f)
-                            
-                            // Apply zoom-relative panning adjustment
-                            val adjustedPan = pan * (1f + (newScale - 1f) * 0.3f)
-                            
-                            val newOffset = Offset(
-                                x = (offset.x + adjustedPan.x).coerceIn(-maxOffsetX, maxOffsetX),
-                                y = (offset.y + adjustedPan.y).coerceIn(-maxOffsetY, maxOffsetY)
-                            )
-                            
-                            onScaleChange(newScale)
-                            onOffsetChange(newOffset)
-                        }
-                    }
-                }
-                .pointerInput(isLocked) {
-                    if (!isLocked) {
-                        detectTapGestures(
-                            onDoubleTap = { onDoubleTap() }
-                        )
-                    }
-                },
-            contentScale = ContentScale.Fit,
-            onLoading = { onLoading() },
-            onSuccess = { onSuccess() },
-            onError = { onError() }
-        )
+    // Create a temporary state for backward compatibility
+    val state = remember {
+        ImageViewerState(initialScale = scale, initialOffset = offset)
     }
+    
+    // Update state when external values change
+    LaunchedEffect(scale, offset, isLocked) {
+        state.updateScale(scale)
+        state.updateOffset(offset)
+        state.isLocked = isLocked
+    }
+    
+    // Monitor state changes and notify parent
+    LaunchedEffect(state.scale) {
+        if (state.scale != scale) {
+            onScaleChange(state.scale)
+        }
+    }
+    
+    LaunchedEffect(state.offset) {
+        if (state.offset != offset) {
+            onOffsetChange(state.offset)
+        }
+    }
+    
+    ImageViewer(
+        state = state,
+        imageUri = imageUri,
+        onLoading = onLoading,
+        onSuccess = { onSuccess() },
+        onError = onError,
+        modifier = modifier
+    )
 }

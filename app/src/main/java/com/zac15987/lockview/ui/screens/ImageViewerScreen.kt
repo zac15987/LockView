@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zac15987.lockview.ui.components.ZoomableImage
+import com.zac15987.lockview.ui.components.ImageViewer
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
@@ -51,22 +51,14 @@ fun ImageViewerScreen(
     ) {
         // Image display
         if (state.imageUri != null) {
-            ZoomableImage(
+            ImageViewer(
+                state = state,
                 imageUri = state.imageUri,
-                isLocked = state.isLocked,
-                scale = state.scale,
-                offset = state.offset,
-                onScaleChange = viewModel::updateScale,
-                onOffsetChange = viewModel::updateOffset,
-                onDoubleTap = {
-                    if (state.scale == 1f) {
-                        viewModel.updateScale(2f)
-                    } else {
-                        viewModel.resetTransform()
-                    }
-                },
                 onLoading = { viewModel.setLoading(true) },
-                onSuccess = { viewModel.setLoading(false) },
+                onSuccess = { imageSize ->
+                    viewModel.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                    viewModel.setLoading(false)
+                },
                 onError = { viewModel.setError("Failed to load image") }
             )
         } else {

@@ -8,7 +8,6 @@ import com.zac15987.lockview.data.ImageViewerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ImageViewerViewModel : ViewModel() {
@@ -17,44 +16,68 @@ class ImageViewerViewModel : ViewModel() {
     val state: StateFlow<ImageViewerState> = _state.asStateFlow()
     
     fun setImageUri(uri: Uri?) {
-        _state.update { it.copy(imageUri = uri, scale = 1f, offset = Offset.Zero) }
-    }
-    
-    fun updateScale(scale: Float) {
-        _state.update { it.copy(scale = scale.coerceIn(0.5f, 5f)) }
-    }
-    
-    fun updateOffset(offset: Offset) {
-        _state.update { it.copy(offset = offset) }
-    }
-    
-    fun toggleLock() {
-        val newLockState = !_state.value.isLocked
-        _state.update { 
-            it.copy(
-                isLocked = newLockState, 
-                toastMessage = if (newLockState) "Image locked" else "Image unlocked"
-            ) 
+        viewModelScope.launch {
+            _state.value.imageUri = uri
+            if (uri != null) {
+                // Reset transform when new image is loaded - use immediate update
+                _state.value.updateScale(_state.value.minScale)
+                _state.value.updateOffset(Offset.Zero)
+            }
         }
     }
     
+    fun updateScale(scale: Float) {
+        viewModelScope.launch {
+            _state.value.updateScale(scale)
+        }
+    }
+    
+    fun updateOffset(offset: Offset) {
+        viewModelScope.launch {
+            _state.value.updateOffset(offset)
+        }
+    }
+    
+    
+    fun toggleLock() {
+        val newLockState = !_state.value.isLocked
+        _state.value.isLocked = newLockState
+        _state.value.toastMessage = if (newLockState) "Image locked" else "Image unlocked"
+    }
+    
     fun unlock() {
-        _state.update { it.copy(isLocked = false, toastMessage = "Image unlocked") }
+        _state.value.isLocked = false
+        _state.value.toastMessage = "Image unlocked"
     }
     
     fun clearToast() {
-        _state.update { it.copy(toastMessage = null) }
+        _state.value.toastMessage = null
     }
     
     fun resetTransform() {
-        _state.update { it.copy(scale = 1f, offset = Offset.Zero) }
+        viewModelScope.launch {
+            _state.value.updateScale(_state.value.minScale)
+            _state.value.updateOffset(Offset.Zero)
+        }
     }
     
     fun setLoading(isLoading: Boolean) {
-        _state.update { it.copy(isLoading = isLoading) }
+        _state.value.isLoading = isLoading
     }
     
     fun setError(error: String?) {
-        _state.update { it.copy(error = error, isLoading = false) }
+        _state.value.error = error
+        _state.value.isLoading = false
+    }
+    
+    fun setImageSize(width: Float, height: Float) {
+        _state.value.setImageSize(width, height)
+    }
+    
+    // Drag functionality
+    fun drag(dragAmount: Offset) {
+        viewModelScope.launch {
+            _state.value.drag(dragAmount)
+        }
     }
 }
