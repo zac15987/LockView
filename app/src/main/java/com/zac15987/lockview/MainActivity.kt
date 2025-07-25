@@ -10,9 +10,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zac15987.lockview.data.theme.ThemeRepository
 import com.zac15987.lockview.ui.screens.ImageViewerScreen
 import com.zac15987.lockview.ui.theme.LockViewTheme
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
+import com.zac15987.lockview.viewmodel.ThemeViewModel
+import com.zac15987.lockview.viewmodel.ThemeViewModelFactory
 
 class MainActivity : ComponentActivity() {
     
@@ -48,10 +52,16 @@ class MainActivity : ComponentActivity() {
         registerReceiver(screenUnlockReceiver, filter)
         
         setContent {
-            LockViewTheme {
+            val themeRepository = ThemeRepository(this@MainActivity)
+            val themeViewModel: ThemeViewModel = viewModel(
+                factory = ThemeViewModelFactory(themeRepository)
+            )
+            val themePreference = themeViewModel.themePreference.collectAsStateWithLifecycle()
+            
+            LockViewTheme(themePreference = themePreference.value) {
                 val vm = viewModel<ImageViewerViewModel>()
                 viewModel = vm // Store reference for unlock detection
-                ImageViewerScreen(vm)
+                ImageViewerScreen(vm, themeViewModel)
             }
         }
     }

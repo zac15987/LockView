@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,16 +21,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
 import com.zac15987.lockview.ui.components.LicensesDialog
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
+import com.zac15987.lockview.viewmodel.ThemeViewModel
 
 @Composable
 fun ImageViewerScreen(
-    viewModel: ImageViewerViewModel = viewModel()
+    viewModel: ImageViewerViewModel = viewModel(),
+    themeViewModel: ThemeViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -37,6 +41,7 @@ fun ImageViewerScreen(
     var showMenu by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
     
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -222,6 +227,13 @@ fun ImageViewerScreen(
                 onDismissRequest = { showMenu = false }
             ) {
                 DropdownMenuItem(
+                    text = { Text("Theme") },
+                    onClick = {
+                        showMenu = false
+                        showThemeDialog = true
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("About") },
                     onClick = {
                         showMenu = false
@@ -246,6 +258,47 @@ fun ImageViewerScreen(
     if (showLicensesDialog) {
         LicensesDialog(
             onDismissRequest = { showLicensesDialog = false }
+        )
+    }
+    
+    // Theme selection dialog
+    if (showThemeDialog) {
+        val currentTheme by themeViewModel.themePreference.collectAsStateWithLifecycle()
+        
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = { Text("Choose Theme") },
+            text = {
+                Column {
+                    ThemePreference.values().forEach { theme ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    themeViewModel.setThemePreference(theme)
+                                    showThemeDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = currentTheme == theme,
+                                onClick = {
+                                    themeViewModel.setThemePreference(theme)
+                                    showThemeDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(theme.displayName)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showThemeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
     
