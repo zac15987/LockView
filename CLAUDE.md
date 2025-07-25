@@ -69,38 +69,44 @@ The app follows modern Android architecture patterns:
 - **Coil Compose**: Image loading and caching
 - **Accompanist Permissions**: Modern permission handling
 - **AndroidX Lifecycle**: ViewModel and state management
-- **DataStore Preferences**: Persistent user preferences (theme settings)
+- **DataStore Preferences**: Persistent user preferences (theme and language settings)
 - **Material3 Dynamic Color**: Adaptive theming for Android 12+
 
 ### Package Structure
 ```
 com.zac15987.lockview/
-├── MainActivity.kt                  # Main activity with device unlock integration
+├── LockViewApplication.kt          # Custom Application class for locale initialization
+├── MainActivity.kt                 # Main activity with device unlock integration
 ├── data/
 │   ├── ImageViewerState.kt         # Image viewer state data model
 │   ├── Bounds.kt                   # Boundary calculation utilities
+│   ├── language/
+│   │   ├── LanguagePreference.kt   # Language preference enum
+│   │   └── LanguageRepository.kt   # Language persistence with DataStore + SharedPreferences
 │   └── theme/
 │       ├── ThemePreference.kt      # Theme preference enum
 │       └── ThemeRepository.kt      # Theme persistence with DataStore
 ├── ui/
 │   ├── components/
-│   │   ├── ImageViewer.kt          # Advanced image viewer component
 │   │   ├── ZoomableImage.kt        # Zoomable image with gesture handling
 │   │   ├── TransformGestureDetector.kt # Custom gesture detection
-│   │   ├── AboutDialog.kt          # App information dialog
-│   │   └── LicensesDialog.kt       # Open source licenses
+│   │   └── LicensesDialog.kt       # Open source licenses and about dialog
 │   ├── screens/
-│   │   └── ImageViewerScreen.kt    # Main UI screen with theme picker
+│   │   └── ImageViewerScreen.kt    # Main UI screen with theme and language pickers
 │   └── theme/
 │       ├── Theme.kt                # Material3 theme with dynamic theming
 │       ├── Color.kt                # Color palette definitions
-│       └── Type.kt                 # Typography definitions
+│       ├── Type.kt                 # Typography definitions
+│       └── LocaleProvider.kt       # Compose context provider for immediate language switching
 ├── utils/
-│   └── PermissionHandler.kt        # Permission utilities
+│   ├── PermissionHandler.kt        # Permission utilities
+│   └── LocaleHelper.kt             # Locale configuration and system language reset
 └── viewmodel/
     ├── ImageViewerViewModel.kt     # Image state and business logic
-    ├── ThemeViewModel.kt           # Theme state management
-    └── ThemeViewModelFactory.kt    # Theme ViewModel factory
+    ├── SettingsViewModel.kt        # Combined theme and language state management
+    ├── SettingsViewModelFactory.kt # Factory for SettingsViewModel dependency injection
+    ├── ThemeViewModel.kt           # Legacy theme state management (still used)
+    └── ThemeViewModelFactory.kt    # Legacy theme ViewModel factory
 ```
 
 ## Core Features
@@ -132,6 +138,13 @@ com.zac15987.lockview/
 - **DataStore persistence**: Theme settings survive app restarts
 - **Theme-aware components**: All UI elements adapt to theme changes
 
+### Internationalization System
+- **Multi-language support**: English, Traditional Chinese, and System (follows device language)
+- **Immediate language switching**: Changes apply instantly without app restart using `LocaleProvider`
+- **Dual persistence**: DataStore for reactive UI updates + SharedPreferences for app startup
+- **Proper system locale handling**: `LocaleHelper` manages locale configuration across Android versions
+- **Resource localization**: All UI strings externalized to `strings.xml` files
+
 ### State Management
 - Zoom level and pan position persistence
 - Lock state maintained across rotations
@@ -143,12 +156,14 @@ com.zac15987.lockview/
 ### Repository Pattern Implementation
 The app implements repository pattern for data persistence:
 - **ThemeRepository**: Uses DataStore for theme preference persistence
+- **LanguageRepository**: Dual storage approach with DataStore + SharedPreferences for language preferences
 - **Centralized state access**: ViewModels interact with repositories, not direct storage
-- **Reactive updates**: Repository exposes `Flow` for automatic UI updates
+- **Reactive updates**: Repositories expose `Flow` for automatic UI updates
 
 ### ViewModel Factory Pattern
 Custom ViewModel factories handle dependency injection:
-- **ThemeViewModelFactory**: Injects ThemeRepository into ThemeViewModel
+- **SettingsViewModelFactory**: Injects both ThemeRepository and LanguageRepository into SettingsViewModel
+- **ThemeViewModelFactory**: Legacy factory for ThemeViewModel (still used in some contexts)
 - **Proper lifecycle management**: Ensures ViewModels receive required dependencies
 - **Testability**: Facilitates dependency injection for testing
 
@@ -186,6 +201,24 @@ Permissions are properly configured in `AndroidManifest.xml`:
 ### State Flow Architecture
 The app uses modern reactive state management:
 - `ImageViewerViewModel.state` exposes `StateFlow<ImageViewerState>`
-- `ThemeViewModel.themePreference` exposes `StateFlow<ThemePreference>`
+- `SettingsViewModel.themePreference` and `SettingsViewModel.languagePreference` expose `StateFlow` for settings
+- `ThemeViewModel.themePreference` exposes `StateFlow<ThemePreference>` (legacy, still used)
 - UI automatically recomposes when state changes
 - Unidirectional data flow with clear action methods
+
+### Internationalization Architecture
+**Immediate Language Switching**:
+- `LocaleProvider` composable wraps UI content with localized context
+- Uses `remember(languagePreference)` to create new context when language changes
+- `CompositionLocalProvider` supplies localized context to all child components
+- No app restart required - changes apply instantly through recomposition
+
+**Dual Storage Strategy**:
+- **DataStore**: Primary storage for reactive UI updates via StateFlow
+- **SharedPreferences**: Secondary storage for immediate access during `Application.attachBaseContext()`
+- `LanguageRepository.setLanguagePreference()` saves to both storage mechanisms
+
+**System Language Reset**:
+- `LocaleHelper.resetToSystemLocale()` properly resets from custom locales to system default
+- Uses `Resources.getSystem()` to get actual device system locale
+- Handles Android 13+ `LocaleManager` and legacy configuration approaches
