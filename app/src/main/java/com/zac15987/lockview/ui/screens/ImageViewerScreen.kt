@@ -23,6 +23,7 @@ import com.zac15987.lockview.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
@@ -30,12 +31,12 @@ import com.zac15987.lockview.ui.components.LicensesDialog
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
-import com.zac15987.lockview.viewmodel.ThemeViewModel
+import com.zac15987.lockview.viewmodel.SettingsViewModel
 
 @Composable
 fun ImageViewerScreen(
     viewModel: ImageViewerViewModel = viewModel(),
-    themeViewModel: ThemeViewModel
+    settingsViewModel: SettingsViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -44,6 +45,7 @@ fun ImageViewerScreen(
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     
     val failedToLoadImageText = stringResource(R.string.failed_to_load_image)
     val imageLockedMessage = stringResource(R.string.image_locked_message)
@@ -246,6 +248,13 @@ fun ImageViewerScreen(
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.language)) },
+                    onClick = {
+                        showMenu = false
+                        showLanguageDialog = true
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.about)) },
                     onClick = {
                         showMenu = false
@@ -275,7 +284,7 @@ fun ImageViewerScreen(
     
     // Theme selection dialog
     if (showThemeDialog) {
-        val currentTheme by themeViewModel.themePreference.collectAsStateWithLifecycle()
+        val currentTheme by settingsViewModel.themePreference.collectAsStateWithLifecycle()
         
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
@@ -287,7 +296,7 @@ fun ImageViewerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    themeViewModel.setThemePreference(theme)
+                                    settingsViewModel.setThemePreference(theme)
                                     showThemeDialog = false
                                 }
                                 .padding(vertical = 8.dp),
@@ -296,7 +305,7 @@ fun ImageViewerScreen(
                             RadioButton(
                                 selected = currentTheme == theme,
                                 onClick = {
-                                    themeViewModel.setThemePreference(theme)
+                                    settingsViewModel.setThemePreference(theme)
                                     showThemeDialog = false
                                 }
                             )
@@ -308,6 +317,47 @@ fun ImageViewerScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    
+    // Language selection dialog
+    if (showLanguageDialog) {
+        val currentLanguage by settingsViewModel.languagePreference.collectAsStateWithLifecycle()
+        
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.choose_language)) },
+            text = {
+                Column {
+                    LanguagePreference.values().forEach { language ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    settingsViewModel.setLanguagePreference(language)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = currentLanguage == language,
+                                onClick = {
+                                    settingsViewModel.setLanguagePreference(language)
+                                    showLanguageDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(language.displayNameResId))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

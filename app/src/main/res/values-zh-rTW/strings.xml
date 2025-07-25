@@ -27,6 +27,13 @@
     <string name="theme_dark">深色</string>
     <string name="theme_system">系統</string>
     
+    <!-- Language -->
+    <string name="language">語言</string>
+    <string name="choose_language">選擇語言</string>
+    <string name="language_system">系統</string>
+    <string name="language_english">English</string>
+    <string name="language_traditional_chinese">繁體中文</string>
+    
     <!-- Permissions -->
     <string name="permission_required">需要權限</string>
     <string name="permission_message">此應用程式需要存取您的圖片權限。請在設定中授予權限。</string>

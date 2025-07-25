@@ -27,6 +27,13 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System</string>
     
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="choose_language">Choose Language</string>
+    <string name="language_system">System</string>
+    <string name="language_english">English</string>
+    <string name="language_traditional_chinese">Traditional Chinese</string>
+    
     <!-- Permissions -->
     <string name="permission_required">Permission Required</string>
     <string name="permission_message">This app needs permission to access your images. Please grant the permission in Settings.</string>

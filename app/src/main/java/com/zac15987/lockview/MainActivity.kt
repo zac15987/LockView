@@ -11,12 +11,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zac15987.lockview.data.language.LanguageRepository
 import com.zac15987.lockview.data.theme.ThemeRepository
 import com.zac15987.lockview.ui.screens.ImageViewerScreen
 import com.zac15987.lockview.ui.theme.LockViewTheme
+import com.zac15987.lockview.ui.theme.LocaleProvider
+import com.zac15987.lockview.utils.LocaleHelper
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
-import com.zac15987.lockview.viewmodel.ThemeViewModel
-import com.zac15987.lockview.viewmodel.ThemeViewModelFactory
+import com.zac15987.lockview.viewmodel.SettingsViewModel
+import com.zac15987.lockview.viewmodel.SettingsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     
@@ -25,6 +28,17 @@ class MainActivity : ComponentActivity() {
     private val keyguardManager by lazy { 
         getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager 
     }
+    
+    private lateinit var languageRepository: LanguageRepository
+    
+    override fun attachBaseContext(newBase: Context) {
+        // Initialize the repository here to be used later in onCreate
+        languageRepository = LanguageRepository(newBase)
+        
+        // The locale is already applied by the Application class
+        super.attachBaseContext(newBase)
+    }
+    
     
     private val screenUnlockReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -55,15 +69,23 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             val themeRepository = ThemeRepository(this@MainActivity)
-            val themeViewModel: ThemeViewModel = viewModel(
-                factory = ThemeViewModelFactory(themeRepository)
+            val settingsViewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(themeRepository, languageRepository)
             )
-            val themePreference = themeViewModel.themePreference.collectAsStateWithLifecycle()
+            val themePreference = settingsViewModel.themePreference.collectAsStateWithLifecycle()
+            val languageChanged = settingsViewModel.languageChanged.collectAsStateWithLifecycle()
+            
+            // Handle language change acknowledgment
+            if (languageChanged.value) {
+                settingsViewModel.onLanguageChangeHandled()
+            }
             
             LockViewTheme(themePreference = themePreference.value) {
-                val vm = viewModel<ImageViewerViewModel>()
-                viewModel = vm // Store reference for unlock detection
-                ImageViewerScreen(vm, themeViewModel)
+                LocaleProvider(settingsViewModel = settingsViewModel) {
+                    val vm = viewModel<ImageViewerViewModel>()
+                    viewModel = vm // Store reference for unlock detection
+                    ImageViewerScreen(vm, settingsViewModel)
+                }
             }
         }
     }
