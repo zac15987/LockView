@@ -1,3 +1,61 @@
 <resources>
-    <string name="app_name">LockView</string>
+    <string name="app_name">Lock View</string>
+    
+    <!-- Main Screen -->
+    <string name="no_image_selected">No image selected</string>
+    <string name="tap_to_select_image">Tap the + button to select an image</string>
+    <string name="image_is_locked">Image is locked</string>
+    <string name="select_image">Select image</string>
+    <string name="lock_image">Lock image</string>
+    <string name="menu">Menu</string>
+    <string name="failed_to_load_image">Failed to load image</string>
+    
+    <!-- Lock/Unlock Messages -->
+    <string name="image_locked_message">Image locked 🔒\nLock and unlock your device screen to unlock the image</string>
+    <string name="image_unlocked_message">Image unlocked 🔓</string>
+    
+    <!-- Common Actions -->
+    <string name="dismiss">Dismiss</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="close">Close</string>
+    
+    <!-- Theme -->
+    <string name="theme">Theme</string>
+    <string name="choose_theme">Choose Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+    
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="choose_language">Choose Language</string>
+    <string name="language_system">System</string>
+    <string name="language_english">English</string>
+    <string name="language_traditional_chinese">Traditional Chinese</string>
+    
+    <!-- Permissions -->
+    <string name="permission_required">Permission Required</string>
+    <string name="permission_message">This app needs permission to access your images. Please grant the permission in Settings.</string>
+    
+    <!-- About Dialog -->
+    <string name="about">About</string>
+    <string name="app_version">Version 1.0.0</string>
+    <string name="app_description">A secure image viewer with lock functionality</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    
+    <!-- Licenses Dialog -->
+    <string name="imageviewer_library_name">ImageViewer for Jetpack Compose</string>
+    <string name="imageviewer_copyright">Copyright (c) 2024 ZhangKe (0xZhangKe)</string>
+    <string name="imageviewer_url">https://github.com/0xZhangKe/ImageViewer</string>
+    <string name="apache_license_2">Apache License, Version 2.0</string>
+    <string name="modifications">Modifications</string>
+    <string name="modifications_detail">The following components were adapted from the ImageViewer library:\n• TransformGestureDetector - Advanced gesture detection\n• Bounds - Boundary constraint management\n• Enhanced ImageViewerState - Animation support\n• ImageViewer component - Core viewer functionality\n\nThese components have been modified to integrate with LockView\'s lock functionality and UI requirements.</string>
+    <string name="additional_libraries">Additional Libraries</string>
+    <string name="additional_libraries_detail">This app also uses the following libraries:\n• AndroidX Core libraries\n• Jetpack Compose\n• Material3 Design Components\n• Coil Image Loading\n• Accompanist Permissions\n\nAll are licensed under Apache License 2.0</string>
+    <string name="lockview_app_license">LockView App License</string>
+    <string name="lockview_license_detail">LockView is licensed under the MIT License.\n\nCopyright (c) 2025 LockView\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</string>
+    
+    <!-- Accessibility -->
+    <string name="zoomable_image">Zoomable image</string>
 </resources>
