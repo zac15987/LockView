@@ -15,9 +15,9 @@ data class DonationOption(
         
         val KOFI = DonationOption(
             displayNameResId = R.string.kofi,
-            url = "https://ko-fi.com"
+            url = "https://ko-fi.com/zac15987"
         )
         
-        fun all() = listOf(PAYPAL, KOFI)
+        fun all() = listOf(KOFI) // PayPal temporarily disabled
     }
 }
