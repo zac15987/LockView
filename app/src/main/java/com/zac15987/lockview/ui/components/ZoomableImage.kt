@@ -103,20 +103,10 @@ fun ImageViewer(
             contentScale = ContentScale.Fit,
             onLoading = { onLoading() },
             onSuccess = { result ->
-                when (result) {
-                    is AsyncImagePainter.State.Success -> {
-                        val drawable = result.result.drawable
-                        val imageSize = IntSize(drawable.intrinsicWidth, drawable.intrinsicHeight)
-                        state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
-                        onSuccess(imageSize)
-                    }
-                    else -> {
-                        // Fallback size
-                        val imageSize = IntSize(1000, 1000)
-                        state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
-                        onSuccess(imageSize)
-                    }
-                }
+                val drawable = result.result.drawable
+                val imageSize = IntSize(drawable.intrinsicWidth, drawable.intrinsicHeight)
+                state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                onSuccess(imageSize)
             },
             onError = { onError() }
         )

@@ -1,5 +1,6 @@
 package com.zac15987.lockview.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +24,7 @@ import com.zac15987.lockview.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zac15987.lockview.data.DonationOption
 import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
@@ -46,6 +48,7 @@ fun ImageViewerScreen(
     var showLicensesDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showDonationDialog by remember { mutableStateOf(false) }
     
     val failedToLoadImageText = stringResource(R.string.failed_to_load_image)
     val imageLockedMessage = stringResource(R.string.image_locked_message)
@@ -255,6 +258,13 @@ fun ImageViewerScreen(
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.donate)) },
+                    onClick = {
+                        showMenu = false
+                        showDonationDialog = true
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.about)) },
                     onClick = {
                         showMenu = false
@@ -358,6 +368,42 @@ fun ImageViewerScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    
+    // Donation selection dialog
+    if (showDonationDialog) {
+        AlertDialog(
+            onDismissRequest = { showDonationDialog = false },
+            title = { Text(stringResource(R.string.choose_donation_method)) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DonationOption.all().forEach { option ->
+                        OutlinedButton(
+                            onClick = {
+                                showDonationDialog = false
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(option.url))
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    viewModel.setError("No browser available")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(option.displayNameResId))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDonationDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
