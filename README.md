@@ -4,6 +4,10 @@ An Android image viewer with lock functionality, gesture controls, and automatic
 
 *Built in collaboration with [Claude Code](https://claude.ai/code)* 
 
+## Motivation for Development
+
+When entering a client's factory for work, a digital contractor ID (an image) is required for access. The process involves opening the contractor ID image, handing the phone to the security guard to scan the barcode on the image, and then having a security sticker applied to the phone's camera. During this procedure, the phone is often accidentally touched, sometimes nearly resulting in the deletion of the contractor ID image or the exposure of personal photos. These issues occur due to accidental gestures triggering the back function or pressing buttons unintentionally. This led to the decision to develop this application, which has successfully resolved this troublesome issue.
+
 ## Features
 
 ### 🔒 Smart Lock System
