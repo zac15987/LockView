@@ -1,6 +1,8 @@
 # LockView
 
-A Android image viewer with lock functionality, gesture controls, and automatic device-unlock integration.
+An Android image viewer with lock functionality, gesture controls, and automatic device-unlock integration.
+
+*Built in collaboration with [Claude Code](https://claude.ai/code)* 
 
 ## Features
 
