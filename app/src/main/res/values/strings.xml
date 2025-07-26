@@ -9,6 +9,7 @@
     <string name="lock_image">Lock image</string>
     <string name="menu">Menu</string>
     <string name="failed_to_load_image">Failed to load image</string>
+    <string name="donate">Donate</string>
     
     <!-- Lock/Unlock Messages -->
     <string name="image_locked_message">Image locked 🔒\nLock and unlock your device screen to unlock the image</string>
@@ -37,6 +38,11 @@
     <!-- Permissions -->
     <string name="permission_required">Permission Required</string>
     <string name="permission_message">This app needs permission to access your images. Please grant the permission in Settings.</string>
+    
+    <!-- Donation -->
+    <string name="choose_donation_method">Choose Donation Method</string>
+    <string name="paypal">PayPal</string>
+    <string name="kofi">Ko-fi</string>
     
     <!-- About Dialog -->
     <string name="about">About</string>

@@ -9,6 +9,7 @@
     <string name="lock_image">鎖定圖片</string>
     <string name="menu">選單</string>
     <string name="failed_to_load_image">載入圖片失敗</string>
+    <string name="donate">捐贈</string>
     
     <!-- Lock/Unlock Messages -->
     <string name="image_locked_message">圖片已鎖定 🔒\n鎖定並解鎖您的裝置螢幕以解鎖圖片</string>
@@ -37,6 +38,11 @@
     <!-- Permissions -->
     <string name="permission_required">需要權限</string>
     <string name="permission_message">此應用程式需要存取您的圖片權限。請在設定中授予權限。</string>
+    
+    <!-- Donation -->
+    <string name="choose_donation_method">選擇捐贈方式</string>
+    <string name="paypal">PayPal</string>
+    <string name="kofi">Ko-fi</string>
     
     <!-- About Dialog -->
     <string name="about">關於</string>
