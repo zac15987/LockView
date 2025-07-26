@@ -9,6 +9,7 @@
     <string name="lock_image">鎖定圖片</string>
     <string name="menu">選單</string>
     <string name="failed_to_load_image">載入圖片失敗</string>
+    <string name="donate">捐贈</string>
     
     <!-- Lock/Unlock Messages -->
     <string name="image_locked_message">圖片已鎖定 🔒\n鎖定並解鎖您的裝置螢幕以解鎖圖片</string>
@@ -38,23 +39,30 @@
     <string name="permission_required">需要權限</string>
     <string name="permission_message">此應用程式需要存取您的圖片權限。請在設定中授予權限。</string>
     
+    <!-- Donation -->
+    <string name="choose_donation_method">選擇捐贈方式</string>
+    <string name="paypal">PayPal</string>
+    <string name="kofi">Ko-fi</string>
+    
     <!-- About Dialog -->
     <string name="about">關於</string>
     <string name="app_version">版本 1.0.0</string>
-    <string name="app_description">具有鎖定功能的安全圖片檢視器</string>
+    <string name="app_description">具有鎖定功能的圖片檢視器</string>
     <string name="open_source_licenses">開放原始碼授權</string>
+    <string name="source_code">原始碼</string>
+    <string name="repository_url">https://gitlab.com/zac15987/LockView</string>
     
     <!-- Licenses Dialog -->
     <string name="imageviewer_library_name">ImageViewer for Jetpack Compose</string>
-    <string name="imageviewer_copyright">版權所有 (c) 2024 ZhangKe (0xZhangKe)</string>
+    <string name="imageviewer_copyright">Copyright (c) 2025 ZhangKe (0xZhangKe)</string>
     <string name="imageviewer_url">https://github.com/0xZhangKe/ImageViewer</string>
-    <string name="apache_license_2">Apache 授權，版本 2.0</string>
+    <string name="apache_license_2">Apache License, Version 2.0</string>
     <string name="modifications">修改內容</string>
     <string name="modifications_detail">以下元件改編自 ImageViewer 函式庫：\n• TransformGestureDetector - 進階手勢偵測\n• Bounds - 邊界限制管理\n• 增強的 ImageViewerState - 動畫支援\n• ImageViewer 元件 - 核心檢視器功能\n\n這些元件已經過修改，以整合 LockView 的鎖定功能和 UI 需求。</string>
     <string name="additional_libraries">其他函式庫</string>
     <string name="additional_libraries_detail">此應用程式還使用以下函式庫：\n• AndroidX Core 函式庫\n• Jetpack Compose\n• Material3 設計元件\n• Coil 圖片載入\n• Accompanist 權限\n\n全部皆採用 Apache 授權 2.0</string>
-    <string name="lockview_app_license">LockView 應用程式授權</string>
-    <string name="lockview_license_detail">LockView 採用 MIT 授權。\n\n版權所有 (c) 2025 LockView\n\n特此免費授予任何取得本軟體及相關文件檔案（「軟體」）副本的人無限制地處理本軟體的權利，包括但不限於使用、複製、修改、合併、發布、散布、再授權及/或銷售本軟體副本的權利，並允許提供本軟體的人員這樣做，但須符合以下條件：\n\n上述版權聲明和本許可聲明應包含在本軟體的所有副本或主要部分中。\n\n本軟體以「現狀」提供，不提供任何明示或暗示的保證，包括但不限於適銷性、特定用途適用性和非侵權性的保證。</string>
+    <string name="lockview_app_license">Lock View 應用程式授權</string>
+    <string name="lockview_license_detail">Lock View 採用 MIT 授權。\n\n版權所有 (c) 2025 zac15987\n\n特此免費授予任何取得本軟體及相關文件檔案（「軟體」）副本的人無限制地處理本軟體的權利，包括但不限於使用、複製、修改、合併、發布、散布、再授權及/或銷售本軟體副本的權利，並允許提供本軟體的人員這樣做，但須符合以下條件：\n\n上述版權聲明和本許可聲明應包含在本軟體的所有副本或主要部分中。\n\n本軟體以「現狀」提供，不提供任何明示或暗示的保證，包括但不限於適銷性、特定用途適用性和非侵權性的保證。</string>
     
     <!-- Accessibility -->
     <string name="zoomable_image">可縮放圖片</string>
