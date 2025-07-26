@@ -50,7 +50,7 @@
     <string name="app_description">A image viewer with lock functionality</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="source_code">Source Code</string>
-    <string name="repository_url">https://gitlab.com/zac15987/LockView</string>
+    <string name="repository_url">https://github.com/zac15987/LockView.git</string>
     
     <!-- Licenses Dialog -->
     <string name="imageviewer_library_name">ImageViewer for Jetpack Compose</string>
