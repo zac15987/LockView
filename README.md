@@ -8,6 +8,42 @@ An Android image viewer with lock functionality, gesture controls, and automatic
 
 When entering a client's factory for work, a digital contractor ID (an image) is required for access. The process involves opening the contractor ID image, handing the phone to the security guard to scan the barcode on the image, and then having a security sticker applied to the phone's camera. During this procedure, the phone is often accidentally touched, sometimes nearly resulting in the deletion of the contractor ID image or the exposure of personal photos. These issues occur due to accidental gestures triggering the back function or pressing buttons unintentionally. This led to the decision to develop this application, which has successfully resolved this troublesome issue.
 
+## Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="docs/screenshots/main-screen.png" width="200" alt="Main Screen" /><br />
+        <sub><b>Main Screen</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/image-selected.png" width="200" alt="Image Selected" /><br />
+        <sub><b>Image Selected</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/image-scaled.png" width="200" alt="Image Scaled" /><br />
+        <sub><b>Image Scaled</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/locked-state.png" width="200" alt="Locked State" /><br />
+        <sub><b>Locked State</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/screenshots/unlocked-state.png" width="200" alt="Unlocked State" /><br />
+        <sub><b>Unlocked State</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/ligth-theme.png" width="200" alt="Light Theme" /><br />
+        <sub><b>Light Theme</b></sub>
+      </td>
+      <td></td>
+    </tr>
+  </table>
+</div>
+
 ## Features
 
 ### 🔒 Smart Lock System
