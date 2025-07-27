@@ -120,6 +120,27 @@ cmd.exe /c "gradlew assembleRelease"   # Release build
 ./gradlew assembleRelease
 ```
 
+### Signing Configuration
+
+For release builds, you'll need to configure signing:
+
+1. Copy `keystore.properties.template` to `keystore.properties`:
+   ```bash
+   cp keystore.properties.template keystore.properties
+   ```
+
+2. Edit `keystore.properties` with your signing information:
+   ```properties
+   storePassword=your_keystore_password
+   keyPassword=your_key_password
+   keyAlias=your_key_alias
+   storeFile=path/to/your/keystore.keystore
+   ```
+
+3. Place your keystore file in the specified location
+
+**Important**: Never commit `keystore.properties` or your `.keystore` files to version control. These files are already added to `.gitignore` for security.
+
 ### Testing
 ```bash
 # Run all tests
