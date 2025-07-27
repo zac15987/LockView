@@ -39,7 +39,6 @@ When entering a client's factory for work, a digital contractor ID (an image) is
         <img src="docs/screenshots/ligth-theme.png" width="200" alt="Light Theme" /><br />
         <sub><b>Light Theme</b></sub>
       </td>
-      <td></td>
     </tr>
   </table>
 </div>
