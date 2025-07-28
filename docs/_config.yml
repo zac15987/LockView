@@ -1,0 +1,15 @@
+# Jekyll configuration for GitHub Pages
+title: Lock View Privacy Policy
+description: Privacy Policy for Lock View - A privacy-focused image viewer for Android
+theme: jekyll-theme-minimal
+markdown: kramdown
+
+# GitHub Pages settings
+github:
+  repository_name: LockView
+  repository_url: https://github.com/zac15987/LockView
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - LICENSE
