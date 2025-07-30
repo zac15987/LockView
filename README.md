@@ -1,5 +1,11 @@
 # LockView
 
+[![Platform](https://img.shields.io/badge/platform-Android-green.svg)](https://www.android.com)
+[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)](https://kotlinlang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Google Play](https://img.shields.io/badge/Google%20Play-Download-green.svg)](https://play.google.com/store/apps/details?id=com.zac15987.lockview)
+
 An Android image viewer with lock functionality, gesture controls, and automatic device-unlock integration.
 
 *Built in collaboration with [Claude Code](https://claude.ai/code)* 
@@ -36,7 +42,7 @@ When entering a client's factory for work, a digital contractor ID (an image) is
         <sub><b>Unlocked State</b></sub>
       </td>
       <td align="center">
-        <img src="docs/screenshots/ligth-theme.png" width="200" alt="Light Theme" /><br />
+        <img src="docs/screenshots/light-theme.png" width="200" alt="Light Theme" /><br />
         <sub><b>Light Theme</b></sub>
       </td>
     </tr>
@@ -68,6 +74,9 @@ When entering a client's factory for work, a digital contractor ID (an image) is
 - Optimized for Android 7.0 (API 24) through Android 15 (API 36)
 
 ## Installation
+
+### From Google Play Store
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=com.zac15987.lockview)
 
 ### From Source
 1. Clone the repository:
