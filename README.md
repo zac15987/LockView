@@ -5,8 +5,9 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green.svg)](https://play.google.com/store/apps/details?id=com.zac15987.lockview)
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-orange.svg)](https://claude.ai/code)
 
-An Android image viewer with lock functionality, gesture controls, and automatic device-unlock integration.
+An Android image viewer with lock functionality, gesture controls, and automatic device-unlock integration that prevents accidental interactions.
 
 *Built in collaboration with [Claude Code](https://claude.ai/code)* 
 
