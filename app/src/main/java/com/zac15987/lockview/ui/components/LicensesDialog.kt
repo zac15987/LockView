@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import com.zac15987.lockview.R
+import com.zac15987.lockview.BuildConfig
 import android.content.Intent
 import android.net.Uri
 
@@ -47,7 +48,7 @@ fun AboutDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.app_version),
+                    text = stringResource(R.string.version_format, BuildConfig.VERSION_NAME),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

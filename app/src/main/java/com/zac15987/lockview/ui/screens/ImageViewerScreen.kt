@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
@@ -161,6 +162,7 @@ fun ImageViewerScreen(
             Card(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
                     .padding(
                         bottom = if (state.error != null) 120.dp else 80.dp,
                         start = 24.dp,
@@ -192,6 +194,7 @@ fun ImageViewerScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
                 .padding(16.dp),
             containerColor = if (state.isLocked) 
                 MaterialTheme.colorScheme.surfaceVariant 
@@ -214,6 +217,7 @@ fun ImageViewerScreen(
                 onClick = { viewModel.lock(imageLockedMessage) },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
                     .padding(16.dp)
             ) {
                 Icon(
