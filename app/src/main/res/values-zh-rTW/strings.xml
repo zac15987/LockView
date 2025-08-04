@@ -46,7 +46,7 @@
     
     <!-- About Dialog -->
     <string name="about">關於</string>
-    <string name="app_version">版本 1.0.0</string>
+    <string name="version_format">版本 %s</string>
     <string name="app_description">具有鎖定功能的圖片檢視器</string>
     <string name="open_source_licenses">開放原始碼授權</string>
     <string name="source_code">原始碼</string>

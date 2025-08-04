@@ -46,7 +46,7 @@
     
     <!-- About Dialog -->
     <string name="about">About</string>
-    <string name="app_version">Version 1.0.0</string>
+    <string name="version_format">Version %s</string>
     <string name="app_description">A image viewer with lock functionality</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="source_code">Source Code</string>
