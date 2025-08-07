@@ -1,7 +1,10 @@
 package com.zac15987.lockview.ui.screens
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,10 +34,20 @@ import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
 import com.zac15987.lockview.ui.components.LicensesDialog
+import com.zac15987.lockview.MainActivity
 import com.zac15987.lockview.utils.ImagePermissionHandler
 import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
 import com.zac15987.lockview.viewmodel.SettingsViewModel
+
+private fun Context.findActivity(): ComponentActivity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is ComponentActivity) return context
+        context = context.baseContext
+    }
+    return null
+}
 
 @Composable
 fun ImageViewerScreen(
@@ -50,6 +63,18 @@ fun ImageViewerScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
+    
+    // Handle system bars visibility based on lock state
+    LaunchedEffect(state.areSystemBarsHidden) {
+        val activity = context.findActivity() as? MainActivity
+        activity?.let {
+            if (state.areSystemBarsHidden) {
+                it.hideSystemBars()
+            } else {
+                it.showSystemBars()
+            }
+        }
+    }
     
     val failedToLoadImageText = stringResource(R.string.failed_to_load_image)
     val imageLockedMessage = stringResource(R.string.image_locked_message)
