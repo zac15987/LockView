@@ -9,6 +9,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zac15987.lockview.data.language.LanguageRepository
@@ -47,6 +50,7 @@ class MainActivity : ComponentActivity() {
                     // Device was unlocked by user
                     context?.let {
                         viewModel?.unlock(it.getString(R.string.image_unlocked_message))
+                        showSystemBars()
                     }
                 }
                 Intent.ACTION_SCREEN_OFF -> {
@@ -56,8 +60,22 @@ class MainActivity : ComponentActivity() {
         }
     }
     
+    fun hideSystemBars() {
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+    
+    fun showSystemBars() {
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         
         // Register broadcast receiver for screen unlock events
@@ -97,6 +115,7 @@ class MainActivity : ComponentActivity() {
         if (wasDeviceLocked && !keyguardManager.isKeyguardLocked) {
             // Device was locked but now is unlocked - unlock the image too
             viewModel?.unlock(getString(R.string.image_unlocked_message))
+            showSystemBars()
             wasDeviceLocked = false
         }
     }

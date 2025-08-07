@@ -45,6 +45,7 @@ class ImageViewerState(
     // Existing app-specific properties
     var imageUri: Uri? by mutableStateOf(null)
     var isLocked: Boolean by mutableStateOf(false)
+    var areSystemBarsHidden: Boolean by mutableStateOf(false)
     var isLoading: Boolean by mutableStateOf(false)
     var error: String? by mutableStateOf(null)
     var toastMessage: String? by mutableStateOf(null)
