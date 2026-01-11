@@ -2,7 +2,6 @@ package com.zac15987.lockview.ui.components
 
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -62,29 +61,26 @@ fun ImageViewer(
                 .pointerInput(state.isLocked, state.isRotationEnabled, lockedControlsEnabled) {
                     val gesturesAllowed = !state.isLocked || lockedControlsEnabled
                     if (gesturesAllowed) {
-                        detectTransformGestures(
-                            panZoomLock = false,
-                            onGesture = { centroid, _, zoom, rotation ->
-                                coroutineScope.launch {
-                                    // Apply zoom
-                                    if (zoom != 1f) {
-                                        val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
-                                        val centerOffset = Offset(size.width / 2f, size.height / 2f)
-                                        val centroidOffset = centroid - centerOffset
-                                        val scaleDelta = newScale - state.scale
-                                        val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
-                                        state.updateScale(newScale)
-                                        state.updateOffset(newOffset)
-                                    }
+                        detectZoomAndRotation { centroid, zoom, rotation ->
+                            coroutineScope.launch {
+                                // Apply zoom
+                                if (zoom != 1f) {
+                                    val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
+                                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
+                                    val centroidOffset = centroid - centerOffset
+                                    val scaleDelta = newScale - state.scale
+                                    val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
+                                    state.updateScale(newScale)
+                                    state.updateOffset(newOffset)
+                                }
 
-                                    // Apply rotation only if rotation mode enabled
-                                    if (state.isRotationEnabled && rotation != 0f) {
-                                        val newRotation = state.rotation + rotation
-                                        state.updateRotation(newRotation)
-                                    }
+                                // Apply rotation only if rotation mode enabled
+                                if (state.isRotationEnabled && rotation != 0f) {
+                                    val newRotation = state.rotation + rotation
+                                    state.updateRotation(newRotation)
                                 }
                             }
-                        )
+                        }
                     }
                 }
                 .pointerInput(state.isLocked, lockedControlsEnabled) {

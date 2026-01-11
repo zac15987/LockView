@@ -114,3 +114,61 @@ private fun calculateAngle(p1: Offset, p2: Offset): Float {
     return atan2(p2.y - p1.y, p2.x - p1.x) * 180f / PI.toFloat()
 }
 
+suspend fun PointerInputScope.detectZoomAndRotation(
+    onGesture: (centroid: Offset, zoom: Float, rotation: Float) -> Unit
+) {
+    val touchSlop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        var zoom = 1f
+        var pastTouchSlop = false
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var previousAngle = 0f
+        var isFirstEvent = true
+
+        do {
+            val event = awaitPointerEvent()
+
+            if (event.changes.size < 2) {
+                return@awaitEachGesture
+            }
+
+            val zoomChange = event.calculateZoom()
+            val centroid = event.calculateCentroid(useCurrent = false)
+
+            // Calculate rotation
+            val (pointer1, pointer2) = event.changes
+            val currentAngle = calculateAngle(pointer1.position, pointer2.position)
+            val rotationDelta = if (isFirstEvent) {
+                isFirstEvent = false
+                previousAngle = currentAngle
+                0f
+            } else {
+                val delta = currentAngle - previousAngle
+                previousAngle = currentAngle
+                // Normalize to -180 to 180 range
+                ((delta + 180) % 360) - 180
+            }
+
+            if (!pastTouchSlop) {
+                zoom *= zoomChange
+                val centroidChange = centroid - event.calculateCentroid(useCurrent = true)
+                val zoomMotion = abs(1 - zoom) * centroid.getDistance()
+                val centroidMotion = centroidChange.getDistance()
+
+                if (zoomMotion > touchSlop || centroidMotion > touchSlop) {
+                    pastTouchSlop = true
+                }
+            }
+
+            if (pastTouchSlop) {
+                onGesture(centroid, zoomChange, rotationDelta)
+                event.changes.forEach {
+                    if (it.positionChanged()) {
+                        it.consume()
+                    }
+                }
+            }
+        } while (event.changes.any { it.pressed })
+    }
+}
+

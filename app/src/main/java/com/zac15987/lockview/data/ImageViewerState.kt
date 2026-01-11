@@ -14,8 +14,10 @@ import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 @Stable
 class ImageViewerState(
@@ -123,8 +125,19 @@ class ImageViewerState(
     
     // Drag functionality
     suspend fun drag(dragAmount: Offset) {
+        // Transform drag coordinates based on rotation
+        val rotationRadians = Math.toRadians(rotation.toDouble())
+        val cosR = cos(rotationRadians).toFloat()
+        val sinR = sin(rotationRadians).toFloat()
+
+        // Rotate drag vector by -rotation to align with image coordinate system
+        val transformedDrag = Offset(
+            x = dragAmount.x * cosR + dragAmount.y * sinR,
+            y = -dragAmount.x * sinR + dragAmount.y * cosR
+        )
+
         // Adjust drag amount by scale to keep consistent pan speed
-        val adjustedDragAmount = dragAmount * scale
+        val adjustedDragAmount = transformedDrag * scale
         val newOffset = offset + adjustedDragAmount
         updateOffset(newOffset)
     }
