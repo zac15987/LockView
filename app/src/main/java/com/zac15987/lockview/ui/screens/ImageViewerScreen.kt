@@ -98,11 +98,8 @@ fun ImageViewerScreen(
         )
     }
 
-    val lockedControlsEnabled by remember {
-        derivedStateOf {
-            settingsViewModel.lockedControlsPreference.value == LockedControlsPreference.ENABLED
-        }
-    }
+    val lockedControlsPreference by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
+    val lockedControlsEnabled = lockedControlsPreference == LockedControlsPreference.ENABLED
 
     Box(
         modifier = Modifier
