@@ -161,7 +161,13 @@ suspend fun PointerInputScope.detectZoomAndRotation(
             }
 
             if (pastTouchSlop) {
-                onGesture(centroid, zoomChange, rotationDelta)
+                // Use higher rotation threshold during active scaling to prevent jitter
+                // When zooming, finger movement causes more angle noise
+                // Base threshold of 1.0° filters micro-movements when fingers are "still"
+                val isActivelyScaling = abs(zoomChange - 1f) > 0.01f
+                val rotationThreshold = if (isActivelyScaling) 1.0f else 1.0f
+                val effectiveRotation = if (abs(rotationDelta) >= rotationThreshold) rotationDelta else 0f
+                onGesture(centroid, zoomChange, effectiveRotation)
                 event.changes.forEach {
                     if (it.positionChanged()) {
                         it.consume()
