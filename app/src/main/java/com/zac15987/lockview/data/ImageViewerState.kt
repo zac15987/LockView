@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlin.math.cos
@@ -123,22 +122,19 @@ class ImageViewerState(
         _offset.snapTo(constrainedOffset)
     }
     
-    // Drag functionality
+    // Drag functionality - screen-relative panning with rotation compensation
     suspend fun drag(dragAmount: Offset) {
-        // Transform drag coordinates based on rotation
         val rotationRadians = Math.toRadians(rotation.toDouble())
         val cosR = cos(rotationRadians).toFloat()
         val sinR = sin(rotationRadians).toFloat()
 
-        // Rotate drag vector by -rotation to align with image coordinate system
+        // Forward rotation to pre-compensate for graphicsLayer's rotation
         val transformedDrag = Offset(
-            x = dragAmount.x * cosR + dragAmount.y * sinR,
-            y = -dragAmount.x * sinR + dragAmount.y * cosR
+            x = dragAmount.x * cosR - dragAmount.y * sinR,
+            y = dragAmount.x * sinR + dragAmount.y * cosR
         )
 
-        // Adjust drag amount by scale to keep consistent pan speed
-        val adjustedDragAmount = transformedDrag * scale
-        val newOffset = offset + adjustedDragAmount
+        val newOffset = offset + transformedDrag
         updateOffset(newOffset)
     }
 
