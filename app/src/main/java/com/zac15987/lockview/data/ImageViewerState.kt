@@ -61,18 +61,22 @@ class ImageViewerState(
     val layoutAspectRatio: Float
         get() = if (layoutSize.height > 0) layoutSize.width.toFloat() / layoutSize.height else 1f
     
-    val minScale: Float
+    // Fit-to-screen scale (image fills screen with aspect ratio preserved)
+    val fitScale: Float
         get() = if (layoutSize.width > 0 && layoutSize.height > 0) {
             val scaleX = layoutSize.width / imageWidth
             val scaleY = layoutSize.height / imageHeight
             min(scaleX, scaleY)
         } else 0.5f
-    
-    val maxScale: Float get() = max(minScale * 8f, 5f)
+
+    // Minimum scale allows zooming out to 50% of fit-to-screen
+    val minScale: Float get() = fitScale * 0.5f
+
+    val maxScale: Float get() = max(fitScale * 8f, 5f)
     
     // Animation functions
     suspend fun animateToStandard() = coroutineScope {
-        val targetScale = minScale
+        val targetScale = fitScale
         val targetOffset = Offset.Zero
 
         async {
@@ -87,7 +91,7 @@ class ImageViewerState(
     }
     
     suspend fun animateToBig(center: Offset) = coroutineScope {
-        val targetScale = min(maxScale, minScale * 2f)
+        val targetScale = min(maxScale, fitScale * 2f)
         val bounds = calculateBounds(targetScale)
         val targetOffset = bounds.coerceIn(-center * (targetScale - 1f))
         
@@ -152,10 +156,14 @@ class ImageViewerState(
         _rotation.snapTo(0f)
     }
 
-    // Update image dimensions
-    fun setImageSize(width: Float, height: Float) {
+    // Update image dimensions and set initial scale to fit-to-screen
+    suspend fun setImageSize(width: Float, height: Float) {
         imageWidth = width
         imageHeight = height
+        // Set initial scale to fit-to-screen
+        if (layoutSize.width > 0 && layoutSize.height > 0) {
+            _scale.snapTo(fitScale)
+        }
     }
     
     // Calculate bounds for current scale

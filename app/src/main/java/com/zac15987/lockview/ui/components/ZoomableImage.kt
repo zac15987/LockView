@@ -97,11 +97,11 @@ fun ImageViewer(
                         detectTapGestures(
                             onDoubleTap = { tapOffset ->
                                 coroutineScope.launch {
-                                    if (abs(state.scale - state.minScale) < 0.1f) {
+                                    if (abs(state.scale - state.fitScale) < 0.1f) {
                                         // Zoom in to double tap location
                                         state.animateToBig(tapOffset)
                                     } else {
-                                        // Zoom out to standard view
+                                        // Zoom out to fit-to-screen
                                         state.animateToStandard()
                                     }
                                 }
@@ -114,7 +114,9 @@ fun ImageViewer(
             onSuccess = { result ->
                 val drawable = result.result.drawable
                 val imageSize = IntSize(drawable.intrinsicWidth, drawable.intrinsicHeight)
-                state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                coroutineScope.launch {
+                    state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                }
                 onSuccess(imageSize)
             },
             onError = { onError() }
