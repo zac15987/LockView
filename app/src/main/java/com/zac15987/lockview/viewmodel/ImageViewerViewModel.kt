@@ -25,6 +25,7 @@ class ImageViewerViewModel : ViewModel() {
                     // Reset transform when new image is loaded - use immediate update
                     currentState.updateScale(currentState.minScale)
                     currentState.updateOffset(Offset.Zero)
+                    currentState.resetRotation()
                 }
                 currentState
             }
@@ -93,6 +94,7 @@ class ImageViewerViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value.updateScale(_state.value.minScale)
             _state.value.updateOffset(Offset.Zero)
+            _state.value.resetRotation()
         }
     }
     
@@ -124,6 +126,26 @@ class ImageViewerViewModel : ViewModel() {
     fun drag(dragAmount: Offset) {
         viewModelScope.launch {
             _state.value.drag(dragAmount)
+        }
+    }
+
+    // Rotation functionality
+    fun updateRotation(rotation: Float) {
+        viewModelScope.launch {
+            _state.value.updateRotation(rotation)
+        }
+    }
+
+    fun toggleRotationMode(enabledMessage: String, disabledMessage: String) {
+        _state.update { currentState ->
+            val newRotationState = !currentState.isRotationEnabled
+            currentState.isRotationEnabled = newRotationState
+            currentState.toastMessage = if (newRotationState) {
+                enabledMessage
+            } else {
+                disabledMessage
+            }
+            currentState
         }
     }
 }

@@ -19,41 +19,41 @@ LockView is a fully functional Android application that provides a lockable imag
 
 ### Building
 ```bash
-cmd.exe /c "gradlew clean build"          # Clean and build everything
-cmd.exe /c "gradlew assembleDebug"        # Build debug APK
-cmd.exe /c "gradlew assembleRelease"      # Build release APK
-cmd.exe /c "gradlew installDebug"         # Build and install debug APK on connected device
-cmd.exe /c "gradlew bundle"              # Assemble bundles for all variants
+cmd.exe //c ".\gradlew.bat clean build"          # Clean and build everything
+cmd.exe //c ".\gradlew.bat assembleDebug"        # Build debug APK
+cmd.exe //c ".\gradlew.bat assembleRelease"      # Build release APK
+cmd.exe //c ".\gradlew.bat installDebug"         # Build and install debug APK on connected device
+cmd.exe //c ".\gradlew.bat bundle"               # Assemble bundles for all variants
 ```
 
 ### Testing
 ```bash
-cmd.exe /c "gradlew test"                 # Run unit tests for all variants
-cmd.exe /c "gradlew testDebugUnitTest"    # Run unit tests for debug build
-cmd.exe /c "gradlew connectedAndroidTest" # Run instrumentation tests on connected devices
-cmd.exe /c "gradlew connectedDebugAndroidTest" # Run debug instrumentation tests
-cmd.exe /c "gradlew check"               # Run all verification tasks
+cmd.exe //c ".\gradlew.bat test"                 # Run unit tests for all variants
+cmd.exe //c ".\gradlew.bat testDebugUnitTest"    # Run unit tests for debug build
+cmd.exe //c ".\gradlew.bat connectedAndroidTest" # Run instrumentation tests on connected devices
+cmd.exe //c ".\gradlew.bat connectedDebugAndroidTest" # Run debug instrumentation tests
+cmd.exe //c ".\gradlew.bat check"               # Run all verification tasks
 ```
 
 ### Code Quality
 ```bash
-cmd.exe /c "gradlew lint"                # Run lint on the default variant
-cmd.exe /c "gradlew lintDebug"          # Run lint for debug variant
-cmd.exe /c "gradlew lintRelease"        # Run lint for release variant
-cmd.exe /c "gradlew lintFix"            # Run lint and apply safe suggestions
-cmd.exe /c "gradlew updateLintBaseline"  # Update lint baseline
+cmd.exe //c ".\gradlew.bat lint"                # Run lint on the default variant
+cmd.exe //c ".\gradlew.bat lintDebug"          # Run lint for debug variant
+cmd.exe //c ".\gradlew.bat lintRelease"        # Run lint for release variant
+cmd.exe //c ".\gradlew.bat lintFix"            # Run lint and apply safe suggestions
+cmd.exe //c ".\gradlew.bat updateLintBaseline"  # Update lint baseline
 ```
 
 ### Other Useful Commands
 ```bash
-cmd.exe /c "gradlew tasks"              # List main tasks
-cmd.exe /c "gradlew tasks --all"        # List all available tasks
-cmd.exe /c "gradlew dependencies"       # Show project dependencies
-cmd.exe /c "gradlew signingReport"      # Display signing info
-cmd.exe /c "gradlew uninstallDebug"     # Uninstall debug build from device
+cmd.exe //c ".\gradlew.bat tasks"              # List main tasks
+cmd.exe //c ".\gradlew.bat tasks --all"        # List all available tasks
+cmd.exe //c ".\gradlew.bat dependencies"       # Show project dependencies
+cmd.exe //c ".\gradlew.bat signingReport"      # Display signing info
+cmd.exe //c ".\gradlew.bat uninstallDebug"     # Uninstall debug build from device
 ```
 
-**Note:** use cmd.exe /c "gradlew" or cmd.exe /c "gradlew.bat"
+**Note:** use cmd.exe //c ".\gradlew.bat"
 
 ## Architecture Overview
 

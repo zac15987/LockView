@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zac15987.lockview.data.language.LanguageRepository
+import com.zac15987.lockview.data.lockedcontrols.LockedControlsRepository
 import com.zac15987.lockview.data.theme.ThemeRepository
 import com.zac15987.lockview.ui.screens.ImageViewerScreen
 import com.zac15987.lockview.ui.theme.LockViewTheme
@@ -87,8 +88,9 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             val themeRepository = ThemeRepository(this@MainActivity)
+            val lockedControlsRepository = LockedControlsRepository(this@MainActivity)
             val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModelFactory(themeRepository, languageRepository)
+                factory = SettingsViewModelFactory(themeRepository, languageRepository, lockedControlsRepository)
             )
             val themePreference = settingsViewModel.themePreference.collectAsStateWithLifecycle()
             val languageChanged = settingsViewModel.languageChanged.collectAsStateWithLifecycle()

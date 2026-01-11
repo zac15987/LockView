@@ -30,7 +30,8 @@ fun ImageViewer(
     onLoading: () -> Unit,
     onSuccess: (IntSize) -> Unit,
     onError: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lockedControlsEnabled: Boolean = false
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -55,27 +56,28 @@ fun ImageViewer(
                     scaleY = state.scale
                     translationX = state.offset.x
                     translationY = state.offset.y
+                    rotationZ = state.rotation
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
+                .pointerInput(state.isLocked, lockedControlsEnabled) {
+                    if (!state.isLocked || lockedControlsEnabled) {
                         detectZoom { centroid, zoom ->
                             coroutineScope.launch {
                                 val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
-                                
+
                                 // Calculate new offset to zoom towards centroid
                                 val centerOffset = Offset(size.width / 2f, size.height / 2f)
                                 val centroidOffset = centroid - centerOffset
                                 val scaleDelta = newScale - state.scale
                                 val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
-                                
+
                                 state.updateScale(newScale)
                                 state.updateOffset(newOffset)
                             }
                         }
                     }
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
+                .pointerInput(state.isLocked, lockedControlsEnabled) {
+                    if (!state.isLocked || lockedControlsEnabled) {
                         detectDragGestures { _, dragAmount ->
                             coroutineScope.launch {
                                 state.drag(dragAmount)
@@ -83,8 +85,8 @@ fun ImageViewer(
                         }
                     }
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
+                .pointerInput(state.isLocked, lockedControlsEnabled) {
+                    if (!state.isLocked || lockedControlsEnabled) {
                         detectTapGestures(
                             onDoubleTap = { tapOffset ->
                                 coroutineScope.launch {
@@ -98,6 +100,17 @@ fun ImageViewer(
                                 }
                             }
                         )
+                    }
+                }
+                .pointerInput(state.isLocked, state.isRotationEnabled, lockedControlsEnabled) {
+                    val gesturesAllowed = !state.isLocked || lockedControlsEnabled
+                    if (gesturesAllowed && state.isRotationEnabled) {
+                        detectRotation { _, rotationDelta ->
+                            coroutineScope.launch {
+                                val newRotation = state.rotation + rotationDelta
+                                state.updateRotation(newRotation)
+                            }
+                        }
                     }
                 },
             contentScale = ContentScale.Fit,

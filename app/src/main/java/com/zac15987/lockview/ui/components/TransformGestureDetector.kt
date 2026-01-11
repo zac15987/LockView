@@ -9,6 +9,8 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.ViewConfiguration
 import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.PI
 
 suspend fun PointerInputScope.detectZoom(
     onZoom: (centroid: Offset, zoom: Float) -> Unit
@@ -58,5 +60,57 @@ suspend fun PointerInputScope.detectZoom(
             }
         } while (event.changes.any { it.pressed })
     }
+}
+
+suspend fun PointerInputScope.detectRotation(
+    onRotate: (centroid: Offset, rotation: Float) -> Unit
+) {
+    val touchSlop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        var rotation = 0f
+        var pastTouchSlop = false
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var previousAngle = 0f
+
+        do {
+            val event = awaitPointerEvent()
+
+            // Require exactly 2 fingers
+            if (event.changes.size != 2) {
+                return@awaitEachGesture
+            }
+
+            // Calculate angle between two pointers
+            val (pointer1, pointer2) = event.changes
+            val angle = calculateAngle(pointer1.position, pointer2.position)
+            val centroid = event.calculateCentroid(useCurrent = false)
+
+            if (pastTouchSlop) {
+                val angleDelta = angle - previousAngle
+                // Normalize to -180 to 180 range
+                val normalizedDelta = ((angleDelta + 180) % 360) - 180
+
+                if (normalizedDelta != 0f) {
+                    onRotate(centroid, normalizedDelta)
+                }
+                event.changes.forEach {
+                    if (it.positionChanged()) {
+                        it.consume()
+                    }
+                }
+            } else {
+                rotation += angle - previousAngle
+                if (abs(rotation) > touchSlop) {
+                    pastTouchSlop = true
+                }
+            }
+
+            previousAngle = angle
+        } while (event.changes.any { it.pressed })
+    }
+}
+
+private fun calculateAngle(p1: Offset, p2: Offset): Float {
+    return atan2(p2.y - p1.y, p2.x - p1.x) * 180f / PI.toFloat()
 }
 

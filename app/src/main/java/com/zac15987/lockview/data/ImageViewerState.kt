@@ -27,6 +27,7 @@ class ImageViewerState(
     // Animatable properties for smooth transitions
     private val _scale = Animatable(initialScale)
     private val _offset = Animatable(initialOffset, Offset.VectorConverter)
+    private val _rotation = Animatable(0f)
     
     // Image dimensions
     var imageWidth by mutableFloatStateOf(imageWidth)
@@ -41,6 +42,7 @@ class ImageViewerState(
     // Current transform values
     val scale: Float get() = _scale.value
     val offset: Offset get() = _offset.value
+    val rotation: Float get() = _rotation.value
     
     // Existing app-specific properties
     var imageUri: Uri? by mutableStateOf(null)
@@ -49,6 +51,7 @@ class ImageViewerState(
     var isLoading: Boolean by mutableStateOf(false)
     var error: String? by mutableStateOf(null)
     var toastMessage: String? by mutableStateOf(null)
+    var isRotationEnabled: Boolean by mutableStateOf(false)
     
     // Computed properties
     val imageAspectRatio: Float
@@ -70,12 +73,15 @@ class ImageViewerState(
     suspend fun animateToStandard() = coroutineScope {
         val targetScale = minScale
         val targetOffset = Offset.Zero
-        
+
         async {
             _scale.animateTo(targetScale, spring())
         }
         async {
             _offset.animateTo(targetOffset, spring())
+        }
+        async {
+            _rotation.animateTo(0f, spring())
         }
     }
     
@@ -122,7 +128,21 @@ class ImageViewerState(
         val newOffset = offset + adjustedDragAmount
         updateOffset(newOffset)
     }
-    
+
+    // Rotation functionality
+    suspend fun updateRotation(newRotation: Float) {
+        val normalized = newRotation % 360f
+        _rotation.snapTo(normalized)
+    }
+
+    suspend fun animateRotation(targetRotation: Float) {
+        _rotation.animateTo(targetRotation, spring())
+    }
+
+    suspend fun resetRotation() {
+        _rotation.snapTo(0f)
+    }
+
     // Update image dimensions
     fun setImageSize(width: Float, height: Float) {
         imageWidth = width
