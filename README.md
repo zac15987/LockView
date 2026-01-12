@@ -46,6 +46,20 @@ When entering a client's factory for work, a digital contractor ID (an image) is
         <img src="docs/screenshots/light-theme.png" width="200" alt="Light Theme" /><br />
         <sub><b>Light Theme</b></sub>
       </td>
+      <td align="center">
+        <img src="docs\screenshots\rotation-mode-enabled.png" width="200" alt="Rotation Mode Enabled" /><br />
+        <sub><b>Rotation Mode Enabled</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs\screenshots\rotation-action.png" width="200" alt="Rotation Action" /><br />
+        <sub><b>Rotation Action</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs\screenshots\locked-control-setting.png" width="200" alt="Locked Control Setting" /><br />
+        <sub><b>Locked Control Setting</b></sub>
+      </td>
     </tr>
   </table>
 </div>
@@ -58,7 +72,9 @@ When entering a client's factory for work, a digital contractor ID (an image) is
 - **Persistent State**: Lock state is maintained across app restarts and screen rotations
 
 ### 🖼️ Advanced Image Viewer
-- **Gesture Controls**: Intuitive pinch-to-zoom, pan, and double-tap zoom
+- **Gesture Controls**: Intuitive pinch-to-zoom, pan, rotation, and double-tap zoom
+- **Rotation Support**: Two-finger rotation gesture with toggle button
+- **Locked Controls**: Optional gesture controls (zoom, pan, rotate) even when locked
 - **Smart Boundaries**: Intelligent pan limits prevent images from moving off-screen
 - **High Performance**: Smooth animations and responsive controls
 - **Format Support**: Works with all common image formats (JPG, PNG, GIF, etc.)
@@ -102,8 +118,10 @@ When entering a client's factory for work, a digital contractor ID (an image) is
 1. **Select an Image**: Tap the "Select Image" button to choose an image from your gallery
 2. **Lock/Unlock**: Use the lock button to secure your image
 3. **Zoom & Pan**: When unlocked, use pinch gestures to zoom and drag to pan
-4. **Auto-Unlock**: Lock your device and unlock it - the image will automatically unlock
-5. **Settings**: Access theme and language options from the menu
+4. **Rotate**: Use two-finger rotation gesture (toggle with rotation button)
+5. **Locked Controls**: Enable in settings to allow gestures while locked
+6. **Auto-Unlock**: Lock your device and unlock it - the image will automatically unlock
+7. **Settings**: Access theme, language, and locked controls options from the menu
 
 ## Development
 
