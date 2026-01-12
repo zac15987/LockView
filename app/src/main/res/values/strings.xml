@@ -34,7 +34,19 @@
     <string name="language_system">System</string>
     <string name="language_english">English</string>
     <string name="language_traditional_chinese">Traditional Chinese</string>
-    
+
+    <!-- Rotation -->
+    <string name="toggle_rotation">Toggle rotation mode</string>
+    <string name="rotation_enabled_message">Rotation mode enabled\nUse two fingers to twist and rotate</string>
+    <string name="rotation_disabled_message">Rotation mode disabled</string>
+
+    <!-- Locked Controls -->
+    <string name="locked_controls">Locked Controls</string>
+    <string name="locked_controls_setting">Locked Controls Setting</string>
+    <string name="locked_controls_description">When enabled, you can still zoom, pan, and rotate the image even when it\'s locked.</string>
+    <string name="locked_controls_enabled">Allow gestures when locked</string>
+    <string name="locked_controls_disabled">Block gestures when locked</string>
+
     <!-- Permissions -->
     <string name="permission_required">Permission Required</string>
     <string name="permission_message">This app needs permission to access your images. Please grant the permission in Settings.</string>

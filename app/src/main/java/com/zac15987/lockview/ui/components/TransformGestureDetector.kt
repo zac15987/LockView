@@ -9,6 +9,8 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.ViewConfiguration
 import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.PI
 
 suspend fun PointerInputScope.detectZoom(
     onZoom: (centroid: Offset, zoom: Float) -> Unit
@@ -50,6 +52,122 @@ suspend fun PointerInputScope.detectZoom(
                 if (zoomChange != 1f) {
                     onZoom(centroid, zoomChange)
                 }
+                event.changes.forEach {
+                    if (it.positionChanged()) {
+                        it.consume()
+                    }
+                }
+            }
+        } while (event.changes.any { it.pressed })
+    }
+}
+
+suspend fun PointerInputScope.detectRotation(
+    onRotate: (centroid: Offset, rotation: Float) -> Unit
+) {
+    val touchSlop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        var rotation = 0f
+        var pastTouchSlop = false
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var previousAngle = 0f
+
+        do {
+            val event = awaitPointerEvent()
+
+            // Require exactly 2 fingers
+            if (event.changes.size != 2) {
+                return@awaitEachGesture
+            }
+
+            // Calculate angle between two pointers
+            val (pointer1, pointer2) = event.changes
+            val angle = calculateAngle(pointer1.position, pointer2.position)
+            val centroid = event.calculateCentroid(useCurrent = false)
+
+            if (pastTouchSlop) {
+                val angleDelta = angle - previousAngle
+                // Normalize to -180 to 180 range
+                val normalizedDelta = ((angleDelta + 180) % 360) - 180
+
+                if (normalizedDelta != 0f) {
+                    onRotate(centroid, normalizedDelta)
+                }
+                event.changes.forEach {
+                    if (it.positionChanged()) {
+                        it.consume()
+                    }
+                }
+            } else {
+                rotation += angle - previousAngle
+                if (abs(rotation) > touchSlop) {
+                    pastTouchSlop = true
+                }
+            }
+
+            previousAngle = angle
+        } while (event.changes.any { it.pressed })
+    }
+}
+
+private fun calculateAngle(p1: Offset, p2: Offset): Float {
+    return atan2(p2.y - p1.y, p2.x - p1.x) * 180f / PI.toFloat()
+}
+
+suspend fun PointerInputScope.detectZoomAndRotation(
+    onGesture: (centroid: Offset, zoom: Float, rotation: Float) -> Unit
+) {
+    val touchSlop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        var zoom = 1f
+        var pastTouchSlop = false
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var previousAngle = 0f
+        var isFirstEvent = true
+
+        do {
+            val event = awaitPointerEvent()
+
+            if (event.changes.size < 2) {
+                return@awaitEachGesture
+            }
+
+            val zoomChange = event.calculateZoom()
+            val centroid = event.calculateCentroid(useCurrent = false)
+
+            // Calculate rotation
+            val (pointer1, pointer2) = event.changes
+            val currentAngle = calculateAngle(pointer1.position, pointer2.position)
+            val rotationDelta = if (isFirstEvent) {
+                isFirstEvent = false
+                previousAngle = currentAngle
+                0f
+            } else {
+                val delta = currentAngle - previousAngle
+                previousAngle = currentAngle
+                // Normalize to -180 to 180 range
+                ((delta + 180) % 360) - 180
+            }
+
+            if (!pastTouchSlop) {
+                zoom *= zoomChange
+                val centroidChange = centroid - event.calculateCentroid(useCurrent = true)
+                val zoomMotion = abs(1 - zoom) * centroid.getDistance()
+                val centroidMotion = centroidChange.getDistance()
+
+                if (zoomMotion > touchSlop || centroidMotion > touchSlop) {
+                    pastTouchSlop = true
+                }
+            }
+
+            if (pastTouchSlop) {
+                // Use higher rotation threshold during active scaling to prevent jitter
+                // When zooming, finger movement causes more angle noise
+                // Base threshold of 1.0° filters micro-movements when fingers are "still"
+                val isActivelyScaling = abs(zoomChange - 1f) > 0.01f
+                val rotationThreshold = if (isActivelyScaling) 1.0f else 1.0f
+                val effectiveRotation = if (abs(rotationDelta) >= rotationThreshold) rotationDelta else 0f
+                onGesture(centroid, zoomChange, effectiveRotation)
                 event.changes.forEach {
                     if (it.positionChanged()) {
                         it.consume()

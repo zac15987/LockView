@@ -15,7 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zac15987.lockview.data.DonationOption
 import com.zac15987.lockview.data.language.LanguagePreference
+import com.zac15987.lockview.data.lockedcontrols.LockedControlsPreference
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
@@ -62,6 +65,7 @@ fun ImageViewerScreen(
     var showLicensesDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showLockedControlsDialog by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
     
     // Handle system bars visibility based on lock state
@@ -93,7 +97,10 @@ fun ImageViewerScreen(
             onPermissionDenied = { showPermissionDeniedDialog = true }
         )
     }
-    
+
+    val lockedControlsPreference by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
+    val lockedControlsEnabled = lockedControlsPreference == LockedControlsPreference.ENABLED
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -109,7 +116,8 @@ fun ImageViewerScreen(
                     viewModel.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
                     viewModel.setLoading(false)
                 },
-                onError = { viewModel.setError(failedToLoadImageText) }
+                onError = { viewModel.setError(failedToLoadImageText) },
+                lockedControlsEnabled = lockedControlsEnabled
             )
         } else {
             // Empty state
@@ -251,7 +259,39 @@ fun ImageViewerScreen(
                 )
             }
         }
-        
+
+        // Rotation toggle button
+        if (state.imageUri != null) {
+            val rotationEnabledMsg = stringResource(R.string.rotation_enabled_message)
+            val rotationDisabledMsg = stringResource(R.string.rotation_disabled_message)
+
+            FloatingActionButton(
+                onClick = {
+                    viewModel.toggleRotationMode(rotationEnabledMsg, rotationDisabledMsg)
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(16.dp),
+                containerColor = if (state.isRotationEnabled)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Icon(
+                    imageVector = if (state.isRotationEnabled)
+                        Icons.Default.Refresh
+                    else
+                        Icons.Outlined.Refresh,
+                    contentDescription = stringResource(R.string.toggle_rotation),
+                    tint = if (state.isRotationEnabled)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
         // Menu button (top-right corner)
         Box(
             modifier = Modifier
@@ -284,6 +324,13 @@ fun ImageViewerScreen(
                     onClick = {
                         showMenu = false
                         showLanguageDialog = true
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.locked_controls)) },
+                    onClick = {
+                        showMenu = false
+                        showLockedControlsDialog = true
                     }
                 )
                 DropdownMenuItem(
@@ -402,7 +449,53 @@ fun ImageViewerScreen(
             }
         )
     }
-    
+
+    // Locked controls selection dialog
+    if (showLockedControlsDialog) {
+        val currentLockedControls by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
+
+        AlertDialog(
+            onDismissRequest = { showLockedControlsDialog = false },
+            title = { Text(stringResource(R.string.locked_controls_setting)) },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.locked_controls_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    LockedControlsPreference.values().forEach { preference ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    settingsViewModel.setLockedControlsPreference(preference)
+                                    showLockedControlsDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = currentLockedControls == preference,
+                                onClick = {
+                                    settingsViewModel.setLockedControlsPreference(preference)
+                                    showLockedControlsDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(preference.displayNameResId))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLockedControlsDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     // Donation selection dialog
     if (showDonationDialog) {
         AlertDialog(

@@ -30,7 +30,8 @@ fun ImageViewer(
     onLoading: () -> Unit,
     onSuccess: (IntSize) -> Unit,
     onError: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lockedControlsEnabled: Boolean = false
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -55,27 +56,35 @@ fun ImageViewer(
                     scaleY = state.scale
                     translationX = state.offset.x
                     translationY = state.offset.y
+                    rotationZ = state.rotation
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
-                        detectZoom { centroid, zoom ->
+                .pointerInput(state.isLocked, state.isRotationEnabled, lockedControlsEnabled) {
+                    val gesturesAllowed = !state.isLocked || lockedControlsEnabled
+                    if (gesturesAllowed) {
+                        detectZoomAndRotation { centroid, zoom, rotation ->
                             coroutineScope.launch {
-                                val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
-                                
-                                // Calculate new offset to zoom towards centroid
-                                val centerOffset = Offset(size.width / 2f, size.height / 2f)
-                                val centroidOffset = centroid - centerOffset
-                                val scaleDelta = newScale - state.scale
-                                val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
-                                
-                                state.updateScale(newScale)
-                                state.updateOffset(newOffset)
+                                // Apply zoom
+                                if (zoom != 1f) {
+                                    val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
+                                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
+                                    val centroidOffset = centroid - centerOffset
+                                    val scaleDelta = newScale - state.scale
+                                    val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
+                                    state.updateScale(newScale)
+                                    state.updateOffset(newOffset)
+                                }
+
+                                // Apply rotation only if rotation mode enabled
+                                if (state.isRotationEnabled && rotation != 0f) {
+                                    val newRotation = state.rotation + rotation
+                                    state.updateRotation(newRotation)
+                                }
                             }
                         }
                     }
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
+                .pointerInput(state.isLocked, lockedControlsEnabled) {
+                    if (!state.isLocked || lockedControlsEnabled) {
                         detectDragGestures { _, dragAmount ->
                             coroutineScope.launch {
                                 state.drag(dragAmount)
@@ -83,16 +92,16 @@ fun ImageViewer(
                         }
                     }
                 }
-                .pointerInput(state.isLocked) {
-                    if (!state.isLocked) {
+                .pointerInput(state.isLocked, lockedControlsEnabled) {
+                    if (!state.isLocked || lockedControlsEnabled) {
                         detectTapGestures(
                             onDoubleTap = { tapOffset ->
                                 coroutineScope.launch {
-                                    if (abs(state.scale - state.minScale) < 0.1f) {
+                                    if (abs(state.scale - state.fitScale) < 0.1f) {
                                         // Zoom in to double tap location
                                         state.animateToBig(tapOffset)
                                     } else {
-                                        // Zoom out to standard view
+                                        // Zoom out to fit-to-screen
                                         state.animateToStandard()
                                     }
                                 }
@@ -105,7 +114,9 @@ fun ImageViewer(
             onSuccess = { result ->
                 val drawable = result.result.drawable
                 val imageSize = IntSize(drawable.intrinsicWidth, drawable.intrinsicHeight)
-                state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                coroutineScope.launch {
+                    state.setImageSize(imageSize.width.toFloat(), imageSize.height.toFloat())
+                }
                 onSuccess(imageSize)
             },
             onError = { onError() }

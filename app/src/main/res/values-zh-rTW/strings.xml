@@ -34,7 +34,19 @@
     <string name="language_system">系統</string>
     <string name="language_english">English</string>
     <string name="language_traditional_chinese">繁體中文</string>
-    
+
+    <!-- Rotation -->
+    <string name="toggle_rotation">切換旋轉模式</string>
+    <string name="rotation_enabled_message">旋轉模式已啟用\n使用兩指扭轉以旋轉圖片</string>
+    <string name="rotation_disabled_message">旋轉模式已停用</string>
+
+    <!-- Locked Controls -->
+    <string name="locked_controls">鎖定控制</string>
+    <string name="locked_controls_setting">鎖定控制設定</string>
+    <string name="locked_controls_description">啟用後，即使圖片已鎖定，您仍可縮放、平移和旋轉圖片。</string>
+    <string name="locked_controls_enabled">鎖定時允許手勢</string>
+    <string name="locked_controls_disabled">鎖定時禁止手勢</string>
+
     <!-- Permissions -->
     <string name="permission_required">需要權限</string>
     <string name="permission_message">此應用程式需要存取您的圖片權限。請在設定中授予權限。</string>

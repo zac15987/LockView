@@ -11,11 +11,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 @Stable
 class ImageViewerState(
@@ -27,6 +28,7 @@ class ImageViewerState(
     // Animatable properties for smooth transitions
     private val _scale = Animatable(initialScale)
     private val _offset = Animatable(initialOffset, Offset.VectorConverter)
+    private val _rotation = Animatable(0f)
     
     // Image dimensions
     var imageWidth by mutableFloatStateOf(imageWidth)
@@ -41,6 +43,7 @@ class ImageViewerState(
     // Current transform values
     val scale: Float get() = _scale.value
     val offset: Offset get() = _offset.value
+    val rotation: Float get() = _rotation.value
     
     // Existing app-specific properties
     var imageUri: Uri? by mutableStateOf(null)
@@ -49,6 +52,7 @@ class ImageViewerState(
     var isLoading: Boolean by mutableStateOf(false)
     var error: String? by mutableStateOf(null)
     var toastMessage: String? by mutableStateOf(null)
+    var isRotationEnabled: Boolean by mutableStateOf(false)
     
     // Computed properties
     val imageAspectRatio: Float
@@ -57,30 +61,37 @@ class ImageViewerState(
     val layoutAspectRatio: Float
         get() = if (layoutSize.height > 0) layoutSize.width.toFloat() / layoutSize.height else 1f
     
-    val minScale: Float
+    // Fit-to-screen scale (image fills screen with aspect ratio preserved)
+    val fitScale: Float
         get() = if (layoutSize.width > 0 && layoutSize.height > 0) {
             val scaleX = layoutSize.width / imageWidth
             val scaleY = layoutSize.height / imageHeight
             min(scaleX, scaleY)
         } else 0.5f
-    
-    val maxScale: Float get() = max(minScale * 8f, 5f)
+
+    // Minimum scale allows zooming out to 50% of fit-to-screen
+    val minScale: Float get() = fitScale * 0.5f
+
+    val maxScale: Float get() = max(fitScale * 8f, 5f)
     
     // Animation functions
     suspend fun animateToStandard() = coroutineScope {
-        val targetScale = minScale
+        val targetScale = fitScale
         val targetOffset = Offset.Zero
-        
+
         async {
             _scale.animateTo(targetScale, spring())
         }
         async {
             _offset.animateTo(targetOffset, spring())
         }
+        async {
+            _rotation.animateTo(0f, spring())
+        }
     }
     
     suspend fun animateToBig(center: Offset) = coroutineScope {
-        val targetScale = min(maxScale, minScale * 2f)
+        val targetScale = min(maxScale, fitScale * 2f)
         val bounds = calculateBounds(targetScale)
         val targetOffset = bounds.coerceIn(-center * (targetScale - 1f))
         
@@ -115,18 +126,44 @@ class ImageViewerState(
         _offset.snapTo(constrainedOffset)
     }
     
-    // Drag functionality
+    // Drag functionality - screen-relative panning with rotation compensation
     suspend fun drag(dragAmount: Offset) {
-        // Adjust drag amount by scale to keep consistent pan speed
-        val adjustedDragAmount = dragAmount * scale
-        val newOffset = offset + adjustedDragAmount
+        val rotationRadians = Math.toRadians(rotation.toDouble())
+        val cosR = cos(rotationRadians).toFloat()
+        val sinR = sin(rotationRadians).toFloat()
+
+        // Forward rotation to pre-compensate for graphicsLayer's rotation
+        val transformedDrag = Offset(
+            x = dragAmount.x * cosR - dragAmount.y * sinR,
+            y = dragAmount.x * sinR + dragAmount.y * cosR
+        )
+
+        val newOffset = offset + transformedDrag
         updateOffset(newOffset)
     }
-    
-    // Update image dimensions
-    fun setImageSize(width: Float, height: Float) {
+
+    // Rotation functionality
+    suspend fun updateRotation(newRotation: Float) {
+        val normalized = newRotation % 360f
+        _rotation.snapTo(normalized)
+    }
+
+    suspend fun animateRotation(targetRotation: Float) {
+        _rotation.animateTo(targetRotation, spring())
+    }
+
+    suspend fun resetRotation() {
+        _rotation.snapTo(0f)
+    }
+
+    // Update image dimensions and set initial scale to fit-to-screen
+    suspend fun setImageSize(width: Float, height: Float) {
         imageWidth = width
         imageHeight = height
+        // Set initial scale to fit-to-screen
+        if (layoutSize.width > 0 && layoutSize.height > 0) {
+            _scale.snapTo(fitScale)
+        }
     }
     
     // Calculate bounds for current scale
