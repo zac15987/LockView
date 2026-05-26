@@ -138,7 +138,8 @@ class ImageViewerState(
             y = dragAmount.x * sinR + dragAmount.y * cosR
         )
 
-        val newOffset = offset + transformedDrag
+        val scaleFactor = if (fitScale > 0f) scale / fitScale else 1f
+        val newOffset = offset + transformedDrag * scaleFactor
         updateOffset(newOffset)
     }
 
