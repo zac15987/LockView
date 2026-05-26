@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
@@ -296,7 +297,8 @@ fun ImageViewerScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 24.dp, end = 8.dp)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp)
         ) {
             IconButton(
                 onClick = { showMenu = true }
