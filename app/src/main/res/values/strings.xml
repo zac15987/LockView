@@ -47,10 +47,6 @@
     <string name="locked_controls_enabled">Allow gestures when locked</string>
     <string name="locked_controls_disabled">Block gestures when locked</string>
 
-    <!-- Permissions -->
-    <string name="permission_required">Permission Required</string>
-    <string name="permission_message">This app needs permission to access your images. Please grant the permission in Settings.</string>
-    
     <!-- Donation -->
     <string name="choose_donation_method">Choose Donation Method</string>
     <string name="paypal">PayPal</string>
@@ -72,7 +68,7 @@
     <string name="modifications">Modifications</string>
     <string name="modifications_detail">The following components were adapted from the ImageViewer library:\n• TransformGestureDetector - Advanced gesture detection\n• Bounds - Boundary constraint management\n• Enhanced ImageViewerState - Animation support\n• ImageViewer component - Core viewer functionality\n\nThese components have been modified to integrate with LockView\'s lock functionality and UI requirements.</string>
     <string name="additional_libraries">Additional Libraries</string>
-    <string name="additional_libraries_detail">This app also uses the following libraries:\n• AndroidX Core libraries\n• Jetpack Compose\n• Material3 Design Components\n• Coil Image Loading\n• Accompanist Permissions\n\nAll are licensed under Apache License 2.0</string>
+    <string name="additional_libraries_detail">This app also uses the following libraries:\n• AndroidX Core libraries\n• Jetpack Compose\n• Material3 Design Components\n• Coil Image Loading\n\nAll are licensed under Apache License 2.0</string>
     <string name="lockview_app_license">Lock View App License</string>
     <string name="lockview_license_detail">Lock View is licensed under the MIT License.\n\nCopyright (c) 2025 zac15987\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</string>
     

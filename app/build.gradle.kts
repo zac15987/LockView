@@ -21,8 +21,8 @@ android {
         applicationId = "com.zac15987.lockview"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.2.1"
+        versionCode = 6
+        versionName = "1.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -74,16 +74,15 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     
     // Image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
     
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    
-    // Permissions
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
-    
+
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     

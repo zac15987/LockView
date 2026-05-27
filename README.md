@@ -216,7 +216,6 @@ This app uses the following open-source libraries:
 
 ### Additional Dependencies
 - **Coil** - Image loading library ([Apache License 2.0](https://github.com/coil-kt/coil/blob/main/LICENSE.txt))
-- **Accompanist Permissions** - Permission handling ([Apache License 2.0](https://github.com/google/accompanist/blob/main/LICENSE))
 
 For detailed license information, see [docs/licenses/THIRD_PARTY_LICENSES.md](docs/licenses/THIRD_PARTY_LICENSES.md)
 
