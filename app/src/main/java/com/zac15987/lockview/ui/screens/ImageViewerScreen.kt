@@ -39,8 +39,6 @@ import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
 import com.zac15987.lockview.ui.components.LicensesDialog
 import com.zac15987.lockview.MainActivity
-import com.zac15987.lockview.utils.ImagePermissionHandler
-import com.zac15987.lockview.utils.hasImagePermission
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
 import com.zac15987.lockview.viewmodel.SettingsViewModel
 
@@ -60,7 +58,6 @@ fun ImageViewerScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
@@ -85,18 +82,11 @@ fun ImageViewerScreen(
     val imageLockedMessage = stringResource(R.string.image_locked_message)
     
     val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri != null) {
             viewModel.setImageUri(uri)
         }
-    }
-    
-    if (!hasImagePermission(context)) {
-        ImagePermissionHandler(
-            onPermissionGranted = { },
-            onPermissionDenied = { showPermissionDeniedDialog = true }
-        )
     }
 
     val lockedControlsPreference by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
@@ -219,11 +209,7 @@ fun ImageViewerScreen(
         FloatingActionButton(
             onClick = {
                 if (!state.isLocked) {
-                    if (hasImagePermission(context)) {
-                        imagePicker.launch("image/*")
-                    } else {
-                        showPermissionDeniedDialog = true
-                    }
+                    imagePicker.launch(arrayOf("image/*"))
                 }
             },
             modifier = Modifier
@@ -529,20 +515,6 @@ fun ImageViewerScreen(
             confirmButton = {
                 TextButton(onClick = { showDonationDialog = false }) {
                     Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-    
-    // Permission denied dialog
-    if (showPermissionDeniedDialog) {
-        AlertDialog(
-            onDismissRequest = { showPermissionDeniedDialog = false },
-            title = { Text(stringResource(R.string.permission_required)) },
-            text = { Text(stringResource(R.string.permission_message)) },
-            confirmButton = {
-                TextButton(onClick = { showPermissionDeniedDialog = false }) {
-                    Text(stringResource(R.string.ok))
                 }
             }
         )

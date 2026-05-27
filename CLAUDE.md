@@ -67,7 +67,6 @@ The app follows modern Android architecture patterns:
 ### Key Dependencies
 - **Jetpack Compose**: UI framework with Material3
 - **Coil Compose**: Image loading and caching
-- **Accompanist Permissions**: Modern permission handling
 - **AndroidX Lifecycle**: ViewModel and state management
 - **DataStore Preferences**: Persistent user preferences (theme and language settings)
 - **Material3 Dynamic Color**: Adaptive theming for Android 12+
@@ -99,7 +98,6 @@ com.zac15987.lockview/
 │       ├── Type.kt                 # Typography definitions
 │       └── LocaleProvider.kt       # Compose context provider for immediate language switching
 ├── utils/
-│   ├── PermissionHandler.kt        # Permission utilities
 │   └── LocaleHelper.kt             # Locale configuration and system language reset
 └── viewmodel/
     ├── ImageViewerViewModel.kt     # Image state and business logic
@@ -112,7 +110,7 @@ com.zac15987.lockview/
 ## Core Features
 
 ### Image Handling
-- Image selection using `ActivityResultContracts.GetContent()`
+- Image selection using `ActivityResultContracts.OpenDocument()` via Storage Access Framework (no runtime permissions required)
 - Coil-based image loading with error handling and loading states
 - Support for various image formats
 
@@ -194,9 +192,7 @@ Custom ViewModel factories handle dependency injection:
 - **DataStore**: Type-safe preference storage replacing SharedPreferences
 
 ### Permissions Configuration
-Permissions are properly configured in `AndroidManifest.xml`:
-- `READ_EXTERNAL_STORAGE` (for Android 12 and below)
-- `READ_MEDIA_IMAGES` (for Android 13+)
+The app declares **no runtime permissions** in `AndroidManifest.xml`. Image access is granted per-URI by the Storage Access Framework when the user picks a file via `ActivityResultContracts.OpenDocument()`. The URI grant is session-scoped and not persisted across app restarts.
 
 ### State Flow Architecture
 The app uses modern reactive state management:

@@ -1,6 +1,6 @@
 # Privacy Policy for Lock View
 
-**Last Updated:** January 28, 2025
+**Last Updated:** May 27, 2026
 
 ## Introduction
 
@@ -31,17 +31,19 @@ This data is stored using Android's DataStore and SharedPreferences, remains on 
 
 ## Permissions
 
-Lock View requires the following permissions to function:
+Lock View does not declare or request any runtime permissions.
 
-### Storage Permissions
-- **READ_EXTERNAL_STORAGE** (Android 12 and below)
-- **READ_MEDIA_IMAGES** (Android 13 and above)
+### How Image Selection Works
 
-These permissions are used solely to allow you to select and view images from your device's storage. Lock View:
-- Only accesses images you explicitly select
-- Does not scan or index your photo library
-- Does not access image metadata or EXIF data
+To open an image, Lock View uses Android's Storage Access Framework (SAF). When you tap the image picker button, the Android system shows its built-in document picker. You manually choose a single image, and the system grants Lock View temporary read access to that image only — scoped to the current app session.
+
+This means Lock View:
+- Holds no permission to read your photo library
+- Cannot scan, index, or enumerate any files on your device
+- Can only read the specific image you actively choose, for the duration of the session
+- Does not access image metadata or EXIF data beyond what is needed to display the image
 - Does not modify or delete any files
+- Loses access to the selected image when the app is closed (you must re-select it on next launch)
 
 ## Data Sharing
 
