@@ -40,9 +40,14 @@
     <string name="rotation_enabled_message">Rotation mode enabled\nUse two fingers to twist and rotate</string>
     <string name="rotation_disabled_message">Rotation mode disabled</string>
 
-    <!-- Locked Controls -->
-    <string name="locked_controls">Locked Controls</string>
-    <string name="locked_controls_setting">Locked Controls Setting</string>
+    <!-- Lock Settings -->
+    <string name="lock_settings">Lock Settings</string>
+    <string name="lock_gestures_section">Gestures when locked</string>
+    <string name="pure_mode_section">Pure viewing mode</string>
+    <string name="pure_mode_description">When enabled, all buttons are hidden while the image is locked — only the image is shown.</string>
+    <string name="pure_mode_enabled">Hide all buttons when locked</string>
+    <string name="pure_mode_disabled">Keep buttons visible when locked</string>
+    <string name="lock_usage_explanation">To lock, tap the lock button. To unlock, lock and then unlock your device screen.</string>
     <string name="locked_controls_description">When enabled, you can still zoom, pan, and rotate the image even when it\'s locked.</string>
     <string name="locked_controls_enabled">Allow gestures when locked</string>
     <string name="locked_controls_disabled">Block gestures when locked</string>
