@@ -39,6 +39,7 @@
     <string name="toggle_rotation">切換旋轉模式</string>
     <string name="rotation_enabled_message">旋轉模式已啟用\n使用兩指扭轉以旋轉圖片</string>
     <string name="rotation_disabled_message">旋轉模式已停用</string>
+    <string name="rotation_locked_hint">旋轉在鎖定時已停用\n可至 選單 → 鎖定設定 允許手勢</string>
 
     <!-- Lock Settings -->
     <string name="lock_settings">鎖定設定</string>

@@ -94,6 +94,9 @@ fun ImageViewerScreen(
 
     val lockedControlsPreference by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
     val lockedControlsEnabled = lockedControlsPreference == LockedControlsPreference.ENABLED
+    // Whether transform gestures (zoom/pan/rotate) can actually be operated right now.
+    // Mirrors the condition used inside ImageViewer's gesture detectors.
+    val gesturesAllowed = !state.isLocked || lockedControlsEnabled
 
     val pureModePreference by settingsViewModel.pureModePreference.collectAsStateWithLifecycle()
     // In pure mode, hide every UI element (buttons + lock indicator) while the image is locked
@@ -260,30 +263,41 @@ fun ImageViewerScreen(
         if (state.imageUri != null && !hideAllUi) {
             val rotationEnabledMsg = stringResource(R.string.rotation_enabled_message)
             val rotationDisabledMsg = stringResource(R.string.rotation_disabled_message)
+            val rotationLockedHint = stringResource(R.string.rotation_locked_hint)
 
+            // When gestures are blocked while locked, the toggle can't do anything.
+            // Grey it out and, on tap, point the user to Lock Settings instead of
+            // silently toggling a mode that won't respond.
             FloatingActionButton(
                 onClick = {
-                    viewModel.toggleRotationMode(rotationEnabledMsg, rotationDisabledMsg)
+                    if (gesturesAllowed) {
+                        viewModel.toggleRotationMode(rotationEnabledMsg, rotationDisabledMsg)
+                    } else {
+                        viewModel.showToast(rotationLockedHint)
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(16.dp),
-                containerColor = if (state.isRotationEnabled)
+                containerColor = if (state.isRotationEnabled && gesturesAllowed)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant
             ) {
+                val rotationActive = state.isRotationEnabled && gesturesAllowed
                 Icon(
-                    imageVector = if (state.isRotationEnabled)
+                    imageVector = if (rotationActive)
                         Icons.Default.Refresh
                     else
                         Icons.Outlined.Refresh,
                     contentDescription = stringResource(R.string.toggle_rotation),
-                    tint = if (state.isRotationEnabled)
+                    tint = if (rotationActive)
                         MaterialTheme.colorScheme.onPrimaryContainer
-                    else
+                    else if (gesturesAllowed)
                         MaterialTheme.colorScheme.onSurfaceVariant
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 )
             }
         }

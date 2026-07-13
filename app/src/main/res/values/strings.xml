@@ -39,6 +39,7 @@
     <string name="toggle_rotation">Toggle rotation mode</string>
     <string name="rotation_enabled_message">Rotation mode enabled\nUse two fingers to twist and rotate</string>
     <string name="rotation_disabled_message">Rotation mode disabled</string>
+    <string name="rotation_locked_hint">Rotation is disabled while locked\nAllow gestures in Menu → Lock Settings</string>
 
     <!-- Lock Settings -->
     <string name="lock_settings">Lock Settings</string>

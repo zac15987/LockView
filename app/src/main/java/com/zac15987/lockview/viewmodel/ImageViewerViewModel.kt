@@ -83,6 +83,13 @@ class ImageViewerViewModel : ViewModel() {
         }
     }
     
+    fun showToast(message: String) {
+        _state.update { currentState ->
+            currentState.toastMessage = message
+            currentState
+        }
+    }
+
     fun clearToast() {
         _state.update { currentState ->
             currentState.toastMessage = null
