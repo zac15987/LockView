@@ -39,10 +39,16 @@
     <string name="toggle_rotation">切換旋轉模式</string>
     <string name="rotation_enabled_message">旋轉模式已啟用\n使用兩指扭轉以旋轉圖片</string>
     <string name="rotation_disabled_message">旋轉模式已停用</string>
+    <string name="rotation_locked_hint">旋轉在鎖定時已停用\n可至 選單 → 鎖定設定 允許手勢</string>
 
-    <!-- Locked Controls -->
-    <string name="locked_controls">鎖定控制</string>
-    <string name="locked_controls_setting">鎖定控制設定</string>
+    <!-- Lock Settings -->
+    <string name="lock_settings">鎖定設定</string>
+    <string name="lock_gestures_section">鎖定時的手勢</string>
+    <string name="pure_mode_section">純淨模式</string>
+    <string name="pure_mode_description">啟用後，圖片鎖定時將隱藏所有按鈕，只顯示圖片。</string>
+    <string name="pure_mode_enabled">鎖定時隱藏所有按鈕</string>
+    <string name="pure_mode_disabled">鎖定時保留按鈕</string>
+    <string name="lock_usage_explanation">鎖定方式：點擊鎖定按鈕。解鎖方式：鎖定並解鎖您的裝置螢幕。</string>
     <string name="locked_controls_description">啟用後，即使圖片已鎖定，您仍可縮放、平移和旋轉圖片。</string>
     <string name="locked_controls_enabled">鎖定時允許手勢</string>
     <string name="locked_controls_disabled">鎖定時禁止手勢</string>

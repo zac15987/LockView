@@ -6,6 +6,8 @@ import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.language.LanguageRepository
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsPreference
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsRepository
+import com.zac15987.lockview.data.puremode.PureModePreference
+import com.zac15987.lockview.data.puremode.PureModeRepository
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.data.theme.ThemeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,8 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val themeRepository: ThemeRepository,
     private val languageRepository: LanguageRepository,
-    private val lockedControlsRepository: LockedControlsRepository
+    private val lockedControlsRepository: LockedControlsRepository,
+    private val pureModeRepository: PureModeRepository
 ) : ViewModel() {
     
     val themePreference: StateFlow<ThemePreference> = themeRepository.themePreference
@@ -41,6 +44,13 @@ class SettingsViewModel(
             initialValue = LockedControlsPreference.DISABLED
         )
 
+    val pureModePreference: StateFlow<PureModePreference> = pureModeRepository.pureModePreference
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = PureModePreference.DISABLED
+        )
+
     private val _languageChanged = MutableStateFlow(false)
     val languageChanged: StateFlow<Boolean> = _languageChanged.asStateFlow()
     
@@ -60,6 +70,12 @@ class SettingsViewModel(
     fun setLockedControlsPreference(preference: LockedControlsPreference) {
         viewModelScope.launch {
             lockedControlsRepository.setLockedControlsPreference(preference)
+        }
+    }
+
+    fun setPureModePreference(preference: PureModePreference) {
+        viewModelScope.launch {
+            pureModeRepository.setPureModePreference(preference)
         }
     }
 

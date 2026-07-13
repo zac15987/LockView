@@ -9,6 +9,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -34,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zac15987.lockview.data.DonationOption
 import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsPreference
+import com.zac15987.lockview.data.puremode.PureModePreference
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
 import com.zac15987.lockview.ui.components.ImageViewer
@@ -63,7 +66,7 @@ fun ImageViewerScreen(
     var showLicensesDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var showLockedControlsDialog by remember { mutableStateOf(false) }
+    var showLockSettingsDialog by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
     
     // Handle system bars visibility based on lock state
@@ -91,6 +94,13 @@ fun ImageViewerScreen(
 
     val lockedControlsPreference by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
     val lockedControlsEnabled = lockedControlsPreference == LockedControlsPreference.ENABLED
+    // Whether transform gestures (zoom/pan/rotate) can actually be operated right now.
+    // Mirrors the condition used inside ImageViewer's gesture detectors.
+    val gesturesAllowed = !state.isLocked || lockedControlsEnabled
+
+    val pureModePreference by settingsViewModel.pureModePreference.collectAsStateWithLifecycle()
+    // In pure mode, hide every UI element (buttons + lock indicator) while the image is locked
+    val hideAllUi = state.isLocked && pureModePreference == PureModePreference.ENABLED
 
     Box(
         modifier = Modifier
@@ -132,7 +142,7 @@ fun ImageViewerScreen(
         }
         
         // Subtle lock indicator in top-right corner
-        if (state.isLocked && state.imageUri != null) {
+        if (state.isLocked && state.imageUri != null && !hideAllUi) {
             Card(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -206,29 +216,31 @@ fun ImageViewerScreen(
         }
         
         // FAB for image selection
-        FloatingActionButton(
-            onClick = {
-                if (!state.isLocked) {
-                    imagePicker.launch(arrayOf("image/*"))
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(16.dp),
-            containerColor = if (state.isLocked) 
-                MaterialTheme.colorScheme.surfaceVariant 
-            else 
-                MaterialTheme.colorScheme.primaryContainer
-        ) {
-            Icon(
-                Icons.Default.Add, 
-                contentDescription = stringResource(R.string.select_image),
-                tint = if (state.isLocked)
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+        if (!hideAllUi) {
+            FloatingActionButton(
+                onClick = {
+                    if (!state.isLocked) {
+                        imagePicker.launch(arrayOf("image/*"))
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(16.dp),
+                containerColor = if (state.isLocked)
+                    MaterialTheme.colorScheme.surfaceVariant
                 else
-                    MaterialTheme.colorScheme.onPrimaryContainer
-            )
+                    MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.select_image),
+                    tint = if (state.isLocked)
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                    else
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
         
         // Lock button (only when unlocked)
@@ -248,93 +260,106 @@ fun ImageViewerScreen(
         }
 
         // Rotation toggle button
-        if (state.imageUri != null) {
+        if (state.imageUri != null && !hideAllUi) {
             val rotationEnabledMsg = stringResource(R.string.rotation_enabled_message)
             val rotationDisabledMsg = stringResource(R.string.rotation_disabled_message)
+            val rotationLockedHint = stringResource(R.string.rotation_locked_hint)
 
+            // When gestures are blocked while locked, the toggle can't do anything.
+            // Grey it out and, on tap, point the user to Lock Settings instead of
+            // silently toggling a mode that won't respond.
             FloatingActionButton(
                 onClick = {
-                    viewModel.toggleRotationMode(rotationEnabledMsg, rotationDisabledMsg)
+                    if (gesturesAllowed) {
+                        viewModel.toggleRotationMode(rotationEnabledMsg, rotationDisabledMsg)
+                    } else {
+                        viewModel.showToast(rotationLockedHint)
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(16.dp),
-                containerColor = if (state.isRotationEnabled)
+                containerColor = if (state.isRotationEnabled && gesturesAllowed)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant
             ) {
+                val rotationActive = state.isRotationEnabled && gesturesAllowed
                 Icon(
-                    imageVector = if (state.isRotationEnabled)
+                    imageVector = if (rotationActive)
                         Icons.Default.Refresh
                     else
                         Icons.Outlined.Refresh,
                     contentDescription = stringResource(R.string.toggle_rotation),
-                    tint = if (state.isRotationEnabled)
+                    tint = if (rotationActive)
                         MaterialTheme.colorScheme.onPrimaryContainer
-                    else
+                    else if (gesturesAllowed)
                         MaterialTheme.colorScheme.onSurfaceVariant
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 )
             }
         }
 
         // Menu button (top-right corner)
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 8.dp, end = 8.dp)
-        ) {
-            IconButton(
-                onClick = { showMenu = true }
+        if (!hideAllUi) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, end = 8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.menu),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.theme)) },
-                    onClick = {
-                        showMenu = false
-                        showThemeDialog = true
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.language)) },
-                    onClick = {
-                        showMenu = false
-                        showLanguageDialog = true
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.locked_controls)) },
-                    onClick = {
-                        showMenu = false
-                        showLockedControlsDialog = true
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.donate)) },
-                    onClick = {
-                        showMenu = false
-                        showDonationDialog = true
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.about)) },
-                    onClick = {
-                        showMenu = false
-                        showAboutDialog = true
-                    }
-                )
+                IconButton(
+                    onClick = { showMenu = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.menu),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.theme)) },
+                        onClick = {
+                            showMenu = false
+                            showThemeDialog = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.language)) },
+                        onClick = {
+                            showMenu = false
+                            showLanguageDialog = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.lock_settings)) },
+                        onClick = {
+                            showMenu = false
+                            showLockSettingsDialog = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.donate)) },
+                        onClick = {
+                            showMenu = false
+                            showDonationDialog = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.about)) },
+                        onClick = {
+                            showMenu = false
+                            showAboutDialog = true
+                        }
+                    )
+                }
             }
         }
     }
@@ -438,47 +463,69 @@ fun ImageViewerScreen(
         )
     }
 
-    // Locked controls selection dialog
-    if (showLockedControlsDialog) {
+    // Lock settings dialog (gestures-when-locked + pure viewing mode)
+    if (showLockSettingsDialog) {
         val currentLockedControls by settingsViewModel.lockedControlsPreference.collectAsStateWithLifecycle()
+        val currentPureMode by settingsViewModel.pureModePreference.collectAsStateWithLifecycle()
 
         AlertDialog(
-            onDismissRequest = { showLockedControlsDialog = false },
-            title = { Text(stringResource(R.string.locked_controls_setting)) },
+            onDismissRequest = { showLockSettingsDialog = false },
+            title = { Text(stringResource(R.string.lock_settings)) },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    // Section 1: gestures when locked
+                    Text(
+                        text = stringResource(R.string.lock_gestures_section),
+                        style = MaterialTheme.typography.titleSmall
+                    )
                     Text(
                         text = stringResource(R.string.locked_controls_description),
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                     )
-                    LockedControlsPreference.values().forEach { preference ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    settingsViewModel.setLockedControlsPreference(preference)
-                                    showLockedControlsDialog = false
-                                }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = currentLockedControls == preference,
-                                onClick = {
-                                    settingsViewModel.setLockedControlsPreference(preference)
-                                    showLockedControlsDialog = false
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(preference.displayNameResId))
-                        }
-                    }
+                    PreferenceRadioGroup(
+                        options = LockedControlsPreference.values().toList(),
+                        isSelected = { it == currentLockedControls },
+                        displayNameResId = { it.displayNameResId },
+                        onSelect = { settingsViewModel.setLockedControlsPreference(it) }
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    // Section 2: pure viewing mode
+                    Text(
+                        text = stringResource(R.string.pure_mode_section),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        text = stringResource(R.string.pure_mode_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                    )
+                    PreferenceRadioGroup(
+                        options = PureModePreference.values().toList(),
+                        isSelected = { it == currentPureMode },
+                        displayNameResId = { it.displayNameResId },
+                        onSelect = { settingsViewModel.setPureModePreference(it) }
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    // How to lock / unlock
+                    Text(
+                        text = stringResource(R.string.lock_usage_explanation),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLockedControlsDialog = false }) {
-                    Text(stringResource(R.string.cancel))
+                TextButton(onClick = { showLockSettingsDialog = false }) {
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -518,5 +565,32 @@ fun ImageViewerScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun <T> PreferenceRadioGroup(
+    options: List<T>,
+    isSelected: (T) -> Boolean,
+    displayNameResId: (T) -> Int,
+    onSelect: (T) -> Unit
+) {
+    Column {
+        options.forEach { option ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSelect(option) }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = isSelected(option),
+                    onClick = { onSelect(option) }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(displayNameResId(option)))
+            }
+        }
     }
 }
