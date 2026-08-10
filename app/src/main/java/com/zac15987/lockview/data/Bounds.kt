@@ -21,22 +21,14 @@ data class Bounds(
         return inside(offset.x, offset.y)
     }
 
+    // Clamped per axis: an image that fits on one axis (left == right) must still be pinned
+    // on that axis. Falling back to isEmpty here would drop clamping on *both* axes.
     fun coerceInX(x: Float): Float {
-        return when {
-            isEmpty -> x
-            x < left -> left
-            x > right -> right
-            else -> x
-        }
+        return if (left > right) x else x.coerceIn(left, right)
     }
 
     fun coerceInY(y: Float): Float {
-        return when {
-            isEmpty -> y
-            y < top -> top
-            y > bottom -> bottom
-            else -> y
-        }
+        return if (top > bottom) y else y.coerceIn(top, bottom)
     }
 
     fun coerceIn(offset: Offset): Offset {
