@@ -23,7 +23,7 @@ class ImageViewerViewModel : ViewModel() {
                 currentState.imageUri = uri
                 if (uri != null) {
                     // Reset transform when new image is loaded - use immediate update
-                    currentState.updateScale(currentState.minScale)
+                    currentState.updateScale(currentState.fitScale)
                     currentState.updateOffset(Offset.Zero)
                     currentState.resetRotation()
                 }
@@ -99,7 +99,7 @@ class ImageViewerViewModel : ViewModel() {
     
     fun resetTransform() {
         viewModelScope.launch {
-            _state.value.updateScale(_state.value.minScale)
+            _state.value.updateScale(_state.value.fitScale)
             _state.value.updateOffset(Offset.Zero)
             _state.value.resetRotation()
         }
