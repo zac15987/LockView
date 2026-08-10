@@ -9,6 +9,7 @@
     <string name="lock_image">Lock image</string>
     <string name="menu">Menu</string>
     <string name="failed_to_load_image">Failed to load image</string>
+    <string name="failed_to_load_shared_image">Couldn\'t open the shared image</string>
     <string name="donate">Donate</string>
     
     <!-- Lock/Unlock Messages -->

@@ -72,6 +72,7 @@ When entering a client's factory for work, a digital contractor ID (an image) is
 - **Persistent State**: Lock state is maintained across app restarts and screen rotations
 
 ### 🖼️ Advanced Image Viewer
+- **Share to Open**: Share an image from your gallery or any other app straight into LockView
 - **Gesture Controls**: Intuitive pinch-to-zoom, pan, rotation, and double-tap zoom
 - **Rotation Support**: Two-finger rotation gesture with toggle button
 - **Locked Controls**: Optional gesture controls (zoom, pan, rotate) even when locked
@@ -115,7 +116,7 @@ When entering a client's factory for work, a digital contractor ID (an image) is
 
 ## Usage
 
-1. **Select an Image**: Tap the "Select Image" button to choose an image from your gallery
+1. **Select an Image**: Tap the "Select Image" button to choose an image from your gallery, or share an image to LockView from any other app
 2. **Lock/Unlock**: Use the lock button to secure your image
 3. **Zoom & Pan**: When unlocked, use pinch gestures to zoom and drag to pan
 4. **Rotate**: Use two-finger rotation gesture (toggle with rotation button)
