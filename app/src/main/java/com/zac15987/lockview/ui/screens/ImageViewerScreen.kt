@@ -173,7 +173,12 @@ fun ImageViewerScreen(
         // Error message
         state.error?.let { error ->
             Snackbar(
-                modifier = Modifier.align(Alignment.BottomCenter),
+                // Sits above the FAB row (nav bar + 16dp padding + 56dp FAB) so the
+                // dismiss action stays clear of the select-image button
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 88.dp, start = 16.dp, end = 16.dp),
                 action = {
                     TextButton(onClick = { viewModel.setError(null) }) {
                         Text(stringResource(R.string.dismiss))
@@ -198,7 +203,8 @@ fun ImageViewerScreen(
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(
-                        bottom = if (state.error != null) 120.dp else 80.dp,
+                        // Stack above the error Snackbar when both are visible
+                        bottom = if (state.error != null) 160.dp else 80.dp,
                         start = 24.dp,
                         end = 24.dp
                     ),
