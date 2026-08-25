@@ -9,6 +9,7 @@
     <string name="lock_image">鎖定圖片</string>
     <string name="menu">選單</string>
     <string name="failed_to_load_image">載入圖片失敗</string>
+    <string name="failed_to_load_shared_image">無法開啟分享的圖片</string>
     <string name="donate">捐贈</string>
     
     <!-- Lock/Unlock Messages -->

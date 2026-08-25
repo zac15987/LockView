@@ -109,6 +109,8 @@ fun ImageViewer(
                         )
                     }
                 },
+            // Fit does the fit-to-screen sizing; graphicsLayer's scale is relative to that
+            // (see ImageViewerState.fitScale), so the two must not both apply a fit factor.
             contentScale = ContentScale.Fit,
             onLoading = { onLoading() },
             onSuccess = { result ->

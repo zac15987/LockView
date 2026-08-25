@@ -5,10 +5,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -22,15 +25,21 @@ import com.zac15987.lockview.ui.screens.ImageViewerScreen
 import com.zac15987.lockview.ui.theme.LockViewTheme
 import com.zac15987.lockview.ui.theme.LocaleProvider
 import com.zac15987.lockview.utils.LocaleHelper
+import com.zac15987.lockview.utils.extractSharedImageUri
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
 import com.zac15987.lockview.viewmodel.SettingsViewModel
 import com.zac15987.lockview.viewmodel.SettingsViewModelFactory
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
     
     private var viewModel: ImageViewerViewModel? = null
     private var wasDeviceLocked = false
-    private val keyguardManager by lazy { 
+
+    // Single-shot channel for images shared in from other apps. The ViewModel only
+    // becomes available during composition, so the result is parked here until then.
+    private val pendingSharedImage = MutableStateFlow<SharedImage?>(null)
+    private val keyguardManager by lazy {
         getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager 
     }
     
@@ -86,7 +95,13 @@ class MainActivity : ComponentActivity() {
             addAction(Intent.ACTION_SCREEN_OFF)   // Device locked
         }
         registerReceiver(screenUnlockReceiver, filter)
-        
+
+        // Only on a fresh start: a configuration change re-runs onCreate with the same
+        // intent, and re-handling it would reset the transform and drop the lock state
+        if (savedInstanceState == null) {
+            handleSharedIntent(intent)
+        }
+
         setContent {
             val themeRepository = ThemeRepository(this@MainActivity)
             val lockedControlsRepository = LockedControlsRepository(this@MainActivity)
@@ -106,12 +121,61 @@ class MainActivity : ComponentActivity() {
                 LocaleProvider(settingsViewModel = settingsViewModel) {
                     val vm = viewModel<ImageViewerViewModel>()
                     viewModel = vm // Store reference for unlock detection
+
+                    val unlockedMessage = stringResource(R.string.image_unlocked_message)
+                    val sharedImageErrorMessage = stringResource(R.string.failed_to_load_shared_image)
+                    // Keyed on the messages too, so a language change doesn't leave stale text
+                    LaunchedEffect(vm, unlockedMessage, sharedImageErrorMessage) {
+                        pendingSharedImage.collect { shared ->
+                            when (shared) {
+                                null -> return@collect
+                                is SharedImage.Ready -> {
+                                    // An explicit share is intentional: release the lock
+                                    if (vm.state.value.isLocked) {
+                                        vm.unlock(unlockedMessage)
+                                    }
+                                    vm.setError(null)
+                                    vm.setImageUri(shared.uri)
+                                }
+                                SharedImage.Failed -> vm.setError(sharedImageErrorMessage)
+                            }
+                            pendingSharedImage.value = null
+                        }
+                    }
+
                     ImageViewerScreen(vm, settingsViewModel)
                 }
             }
         }
     }
     
+    /** Result of parsing an incoming ACTION_SEND intent. */
+    private sealed interface SharedImage {
+        data class Ready(val uri: Uri) : SharedImage
+        data object Failed : SharedImage
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleSharedIntent(intent)
+    }
+
+    /**
+     * Picks up an image shared in from another app. The result is handed to the ViewModel by
+     * the collector inside [setContent], which also resets the transform and lock state.
+     */
+    private fun handleSharedIntent(intent: Intent) {
+        if (intent.action != Intent.ACTION_SEND) return
+
+        val uri = intent.extractSharedImageUri()
+        pendingSharedImage.value = if (uri != null) {
+            SharedImage.Ready(uri)
+        } else {
+            SharedImage.Failed
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         

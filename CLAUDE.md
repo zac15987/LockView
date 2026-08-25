@@ -98,7 +98,8 @@ com.zac15987.lockview/
 │       ├── Type.kt                 # Typography definitions
 │       └── LocaleProvider.kt       # Compose context provider for immediate language switching
 ├── utils/
-│   └── LocaleHelper.kt             # Locale configuration and system language reset
+│   ├── LocaleHelper.kt             # Locale configuration and system language reset
+│   └── ShareIntentHelper.kt        # Extracts the image URI from an incoming ACTION_SEND intent
 └── viewmodel/
     ├── ImageViewerViewModel.kt     # Image state and business logic
     ├── SettingsViewModel.kt        # Combined theme and language state management
@@ -111,6 +112,7 @@ com.zac15987.lockview/
 
 ### Image Handling
 - Image selection using `ActivityResultContracts.OpenDocument()` via Storage Access Framework (no runtime permissions required)
+- Receives single images shared from other apps via `ACTION_SEND` (`image/*`): `MainActivity` uses `launchMode="singleTask"` + `onNewIntent` so an existing instance is reused, parses the URI with `Intent.extractSharedImageUri()` (`utils/ShareIntentHelper.kt`), and replaces the current image while resetting the transform and releasing the lock
 - Coil-based image loading with error handling and loading states
 - Support for various image formats
 
@@ -192,7 +194,7 @@ Custom ViewModel factories handle dependency injection:
 - **DataStore**: Type-safe preference storage replacing SharedPreferences
 
 ### Permissions Configuration
-The app declares **no runtime permissions** in `AndroidManifest.xml`. Image access is granted per-URI by the Storage Access Framework when the user picks a file via `ActivityResultContracts.OpenDocument()`. The URI grant is session-scoped and not persisted across app restarts.
+The app declares **no runtime permissions** in `AndroidManifest.xml`. Image access is granted per-URI by the Storage Access Framework when the user picks a file via `ActivityResultContracts.OpenDocument()`, or by the sending app's `FLAG_GRANT_READ_URI_PERMISSION` when an image is shared in via `ACTION_SEND`. Both grants are session-scoped and not persisted across app restarts — `takePersistableUriPermission` is deliberately never called (shared URIs generally don't support it).
 
 ### State Flow Architecture
 The app uses modern reactive state management:

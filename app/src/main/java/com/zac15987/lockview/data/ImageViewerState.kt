@@ -61,18 +61,26 @@ class ImageViewerState(
     val layoutAspectRatio: Float
         get() = if (layoutSize.height > 0) layoutSize.width.toFloat() / layoutSize.height else 1f
     
-    // Fit-to-screen scale (image fills screen with aspect ratio preserved)
-    val fitScale: Float
-        get() = if (layoutSize.width > 0 && layoutSize.height > 0) {
-            val scaleX = layoutSize.width / imageWidth
-            val scaleY = layoutSize.height / imageHeight
-            min(scaleX, scaleY)
-        } else 0.5f
+    // Factor ContentScale.Fit already applies to draw the image inside the layout.
+    // Used only to derive the on-screen content size for pan bounds.
+    private val fitFactor: Float
+        get() = if (layoutSize.width > 0 && layoutSize.height > 0 && imageWidth > 0 && imageHeight > 0) {
+            min(layoutSize.width / imageWidth, layoutSize.height / imageHeight)
+        } else 1f
+
+    // Size the image occupies on screen at scale 1f
+    private val contentWidth: Float get() = imageWidth * fitFactor
+    private val contentHeight: Float get() = imageHeight * fitFactor
+
+    // Fit-to-screen scale. ImageViewer draws with ContentScale.Fit, which already fits the
+    // image to the layout, so the graphicsLayer scale is relative and 1f *is* fit-to-screen.
+    // Applying a pixel-based fit factor here too would scale the image twice.
+    val fitScale: Float get() = 1f
 
     // Minimum scale allows zooming out to 50% of fit-to-screen
     val minScale: Float get() = fitScale * 0.5f
 
-    val maxScale: Float get() = max(fitScale * 8f, 5f)
+    val maxScale: Float get() = fitScale * 8f
     
     // Animation functions
     suspend fun animateToStandard() = coroutineScope {
@@ -93,8 +101,15 @@ class ImageViewerState(
     suspend fun animateToBig(center: Offset) = coroutineScope {
         val targetScale = min(maxScale, fitScale * 2f)
         val bounds = calculateBounds(targetScale)
-        val targetOffset = bounds.coerceIn(-center * (targetScale - 1f))
-        
+
+        // graphicsLayer scales around the layout centre, so the tap must be expressed relative
+        // to it: keeping the tapped point still means offset = d * (1 - k) + offset * k, where
+        // d is the tap's distance from the centre and k the scale ratio.
+        val layoutCenter = Offset(layoutSize.width / 2f, layoutSize.height / 2f)
+        val d = center - layoutCenter
+        val k = if (scale > 0f) targetScale / scale else targetScale
+        val targetOffset = bounds.coerceIn(d * (1f - k) + offset * k)
+
         async {
             _scale.animateTo(targetScale, spring())
         }
@@ -162,9 +177,7 @@ class ImageViewerState(
         imageWidth = width
         imageHeight = height
         // Set initial scale to fit-to-screen
-        if (layoutSize.width > 0 && layoutSize.height > 0) {
-            _scale.snapTo(fitScale)
-        }
+        _scale.snapTo(fitScale)
     }
     
     // Calculate bounds for current scale
@@ -173,8 +186,10 @@ class ImageViewerState(
             return Bounds.EMPTY
         }
         
-        val scaledImageWidth = imageWidth * currentScale
-        val scaledImageHeight = imageHeight * currentScale
+        // Bounds are based on the size the image actually occupies on screen, which is the
+        // ContentScale.Fit content size times the current (relative) scale
+        val scaledImageWidth = contentWidth * currentScale
+        val scaledImageHeight = contentHeight * currentScale
         
         val maxOffsetX = max(0f, (scaledImageWidth - layoutSize.width) / 2f)
         val maxOffsetY = max(0f, (scaledImageHeight - layoutSize.height) / 2f)
