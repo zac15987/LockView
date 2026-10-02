@@ -13,7 +13,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -209,6 +208,11 @@ class ImageViewerState(
         _scale.snapTo(fitScale)
     }
     
+    private companion object {
+        // Smallest share of the image (per axis) that panning must leave on screen
+        const val MIN_VISIBLE_FRACTION = 0.1f
+    }
+
     // Calculate bounds for current scale
     private fun calculateBounds(currentScale: Float): Bounds {
         if (layoutSize.width == 0 || layoutSize.height == 0) {
@@ -220,11 +224,20 @@ class ImageViewerState(
         val scaledImageWidth = contentWidth * currentScale
         val scaledImageHeight = contentHeight * currentScale
         
-        // Per axis: larger than the layout -> the image edge can go at most to the layout edge;
-        // smaller (zoomed out, or the letterboxed axis) -> it can move as long as it stays fully
-        // inside the layout. Both are |scaled - layout| / 2.
-        val maxOffsetX = abs(scaledImageWidth - layoutSize.width) / 2f
-        val maxOffsetY = abs(scaledImageHeight - layoutSize.height) / 2f
+        // Per axis, the larger of:
+        //  - scaled / 2: any point of the image can be brought to the layout centre, so an area
+        //    near the image edge can be centred instead of stopping at the screen edge
+        //  - layout / 2 + scaled * (1/2 - MIN_VISIBLE_FRACTION): the image can be pushed off
+        //    screen until only MIN_VISIBLE_FRACTION of it is left inside the layout
+        // Both are continuous in scale, so zooming never makes the offset jump.
+        val maxOffsetX = max(
+            scaledImageWidth / 2f,
+            layoutSize.width / 2f + scaledImageWidth * (0.5f - MIN_VISIBLE_FRACTION)
+        )
+        val maxOffsetY = max(
+            scaledImageHeight / 2f,
+            layoutSize.height / 2f + scaledImageHeight * (0.5f - MIN_VISIBLE_FRACTION)
+        )
         
         return Bounds(
             left = -maxOffsetX,

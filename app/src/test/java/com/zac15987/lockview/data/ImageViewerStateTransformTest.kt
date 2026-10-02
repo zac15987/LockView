@@ -87,24 +87,33 @@ class ImageViewerStateTransformTest {
     }
 
     @Test
-    fun panIsClampedToImageEdges() = runBlocking {
+    fun zoomedInPanLeavesTenPercentOfTheImageOnScreen() = runBlocking {
         state.transform(center, Offset.Zero, 2f, 0f)
 
         state.transform(center + Offset(5000f, 0f), Offset(5000f, 0f), 1f, 0f)
 
-        // Image is 2000px wide at 2x on a 1000px layout -> at most 500px each way
-        assertOffsetEquals(Offset(500f, 0f), state.offset)
+        // Image is 2000px wide at 2x on a 1000px layout -> 10% of it (200px) stays on screen
+        assertOffsetEquals(Offset(1300f, 0f), state.offset)
     }
 
     @Test
-    fun zoomedOutImageCanMoveButStaysOnScreen() = runBlocking {
+    fun zoomedOutImageCanMove() = runBlocking {
         state.transform(center, Offset.Zero, 0.6f, 0f)
 
         state.transform(center + Offset(-100f, 150f), Offset(-100f, 150f), 1f, 0f)
         assertOffsetEquals(Offset(-100f, 150f), state.offset)
 
         state.transform(center + Offset(5000f, -5000f), Offset(5000f, -5000f), 1f, 0f)
-        // 600x1200 image on a 1000x2000 layout -> at most 200px / 400px each way
-        assertOffsetEquals(Offset(200f, -400f), state.offset)
+        // 600x1200 image on a 1000x2000 layout -> 10% of it (60px / 120px) stays on screen
+        assertOffsetEquals(Offset(740f, -1480f), state.offset)
+    }
+
+    @Test
+    fun atFitScale_panLeavesTenPercentOfTheImageOnScreen() = runBlocking {
+        state.transform(center + Offset(-5000f, 5000f), Offset(-5000f, 5000f), 1f, 0f)
+
+        // 1000x2000 image filling a 1000x2000 layout -> 90% of it can go off screen
+        assertEquals(-900f, state.offset.x, 0.5f)
+        assertEquals(1800f, state.offset.y, 0.5f)
     }
 }

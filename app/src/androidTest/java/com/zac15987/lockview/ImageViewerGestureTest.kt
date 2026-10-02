@@ -209,6 +209,31 @@ class ImageViewerGestureTest {
     }
 
     @Test
+    fun zoomedIn_areaNearImageCornerCanBeDraggedToScreenCentre() {
+        val c = contentSize()
+        val corner = center + Offset(c.x * 0.45f, c.y * 0.45f)
+        node.performTouchInput { doubleClick(corner) }
+        rule.waitForIdle()
+        assertEquals(2f, state.scale, 0.01f)
+
+        // corner stays where it was tapped; now drag it to the middle of the screen
+        node.performTouchInput {
+            down(0, corner)
+            repeat(5) { i -> moveTo(0, corner - Offset((i + 1) * 6f, (i + 1) * 6f)) }
+        }
+        rule.waitForIdle()
+        val grabbed = corner - Offset(30f, 30f)
+        val anchor = toLocal(grabbed)
+        node.performTouchInput {
+            val steps = 30
+            repeat(steps) { i -> moveTo(0, grabbed + (center - grabbed) * ((i + 1f) / steps)) }
+        }
+        rule.waitForIdle()
+        assertNear(center, toScreen(anchor))
+        node.performTouchInput { up(0) }
+    }
+
+    @Test
     fun rotateWithRotationEnabled_pointStaysUnderFingers() {
         state.isRotationEnabled = true
         rule.waitForIdle()
