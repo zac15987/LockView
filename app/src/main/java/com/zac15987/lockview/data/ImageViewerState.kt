@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import com.zac15987.lockview.data.panrange.PanRangeRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlin.math.cos
@@ -53,6 +54,10 @@ class ImageViewerState(
     var error: String? by mutableStateOf(null)
     var toastMessage: String? by mutableStateOf(null)
     var isRotationEnabled: Boolean by mutableStateOf(false)
+
+    // Smallest share of the image (per axis) that panning must leave on screen
+    var minVisibleFraction by mutableFloatStateOf(PanRangeRepository.DEFAULT_PERCENT / 100f)
+        private set
     
     // Computed properties
     val imageAspectRatio: Float
@@ -186,6 +191,14 @@ class ImageViewerState(
         updateOffset(newOffset)
     }
 
+    // Re-clamps the current offset, so a tighter range takes effect immediately instead of
+    // making the image jump on the next touch
+    suspend fun updateMinVisibleFraction(fraction: Float) {
+        if (fraction == minVisibleFraction) return
+        minVisibleFraction = fraction
+        updateOffset(offset)
+    }
+
     // Rotation functionality
     suspend fun updateRotation(newRotation: Float) {
         val normalized = newRotation % 360f
@@ -208,11 +221,6 @@ class ImageViewerState(
         _scale.snapTo(fitScale)
     }
     
-    private companion object {
-        // Smallest share of the image (per axis) that panning must leave on screen
-        const val MIN_VISIBLE_FRACTION = 0.1f
-    }
-
     // Calculate bounds for current scale
     private fun calculateBounds(currentScale: Float): Bounds {
         if (layoutSize.width == 0 || layoutSize.height == 0) {
@@ -227,16 +235,16 @@ class ImageViewerState(
         // Per axis, the larger of:
         //  - scaled / 2: any point of the image can be brought to the layout centre, so an area
         //    near the image edge can be centred instead of stopping at the screen edge
-        //  - layout / 2 + scaled * (1/2 - MIN_VISIBLE_FRACTION): the image can be pushed off
-        //    screen until only MIN_VISIBLE_FRACTION of it is left inside the layout
+        //  - layout / 2 + scaled * (1/2 - minVisibleFraction): the image can be pushed off
+        //    screen until only minVisibleFraction of it is left inside the layout
         // Both are continuous in scale, so zooming never makes the offset jump.
         val maxOffsetX = max(
             scaledImageWidth / 2f,
-            layoutSize.width / 2f + scaledImageWidth * (0.5f - MIN_VISIBLE_FRACTION)
+            layoutSize.width / 2f + scaledImageWidth * (0.5f - minVisibleFraction)
         )
         val maxOffsetY = max(
             scaledImageHeight / 2f,
-            layoutSize.height / 2f + scaledImageHeight * (0.5f - MIN_VISIBLE_FRACTION)
+            layoutSize.height / 2f + scaledImageHeight * (0.5f - minVisibleFraction)
         )
         
         return Bounds(

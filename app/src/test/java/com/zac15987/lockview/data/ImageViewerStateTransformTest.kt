@@ -116,4 +116,15 @@ class ImageViewerStateTransformTest {
         assertEquals(-900f, state.offset.x, 0.5f)
         assertEquals(1800f, state.offset.y, 0.5f)
     }
+
+    @Test
+    fun raisingMinVisibleFractionReclampsCurrentOffset() = runBlocking {
+        state.transform(center + Offset(-5000f, 0f), Offset(-5000f, 0f), 1f, 0f)
+        assertEquals(-900f, state.offset.x, 0.5f)
+
+        state.updateMinVisibleFraction(0.5f)
+
+        // Half of the 1000px image must now stay on screen
+        assertEquals(-500f, state.offset.x, 0.5f)
+    }
 }

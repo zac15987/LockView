@@ -30,10 +30,15 @@ fun ImageViewer(
     onSuccess: (IntSize) -> Unit,
     onError: () -> Unit,
     modifier: Modifier = Modifier,
-    lockedControlsEnabled: Boolean = false
+    lockedControlsEnabled: Boolean = false,
+    minVisibleFraction: Float = state.minVisibleFraction
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(minVisibleFraction) {
+        state.updateMinVisibleFraction(minVisibleFraction)
+    }
     
     // Gestures are detected on this untransformed Box rather than on the image itself, so all
     // pointer positions are screen coordinates. On the image (after graphicsLayer) they would be
