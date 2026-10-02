@@ -141,6 +141,34 @@ class ImageViewerState(
         _offset.snapTo(constrainedOffset)
     }
     
+    // Combined pinch/pan/rotate step. centroid and pan are in screen (layout) coordinates, not
+    // the transformed image's. The image point under the previous centroid (centroid - pan) is
+    // kept under the current centroid: with d = point - layout centre and k = scale ratio,
+    // newOffset = dCurrent - R(rotationDelta) * k * (dPrevious - offset).
+    suspend fun transform(centroid: Offset, pan: Offset, zoom: Float, rotationDelta: Float) {
+        val newScale = (scale * zoom).coerceIn(minScale, maxScale)
+        val k = if (scale > 0f) newScale / scale else 1f
+
+        val layoutCenter = Offset(layoutSize.width / 2f, layoutSize.height / 2f)
+        val current = centroid - layoutCenter
+        val previous = current - pan
+        val newOffset = current - (previous - offset).rotateBy(rotationDelta) * k
+
+        _scale.snapTo(newScale)
+        if (rotationDelta != 0f) {
+            _rotation.snapTo((rotation + rotationDelta) % 360f)
+        }
+        updateOffset(newOffset)
+    }
+
+    private fun Offset.rotateBy(degrees: Float): Offset {
+        if (degrees == 0f) return this
+        val radians = Math.toRadians(degrees.toDouble())
+        val cosR = cos(radians).toFloat()
+        val sinR = sin(radians).toFloat()
+        return Offset(x * cosR - y * sinR, x * sinR + y * cosR)
+    }
+
     // Drag functionality - screen-relative panning with rotation compensation
     suspend fun drag(dragAmount: Offset) {
         val rotationRadians = Math.toRadians(rotation.toDouble())
