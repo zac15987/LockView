@@ -1,0 +1,17 @@
+<en-US>
+v1.5.0
+
+• NEW: Zoom into any part of the image — when zoomed in, areas near the edges and corners can now be dragged to the middle of the screen.
+• NEW: Pan Range setting — choose how much of the image must stay on screen while you drag it (5%–50%).
+• FIX: Pinch zoom no longer drifts away from your fingers, and pinching, moving and rotating now work together in one gesture.
+• FIX: An image zoomed out smaller than the screen can now be moved.
+
+</en-US>
+<zh-TW>
+v1.5.0
+
+• 新增：可放大圖片的任何位置 — 放大後，靠近邊緣與角落的區域也能拖曳到畫面中央。
+• 新增：平移範圍設定 — 可自訂拖曳時至少要留在畫面上的圖片比例（5%–50%）。
+• 修正：雙指縮放不再偏離手指位置，且縮放、移動與旋轉現在可在同一個手勢中同時進行。
+• 修正：縮小到比螢幕還小的圖片，現在可以移動。
+</zh-TW>

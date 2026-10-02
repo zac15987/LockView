@@ -1,0 +1,17 @@
+<en-US>
+v1.4.0
+
+• NEW: Share to open — share an image from your gallery or any other app straight into LockView, with no need to pick the file yourself.
+• FIX: Images smaller than the screen were cropped along their left and right edges.
+• FIX: A zoomed image could be dragged off screen, and double-tapping zoomed off-centre instead of in place.
+• FIX: Error messages no longer overlap the buttons at the bottom of the screen.
+
+</en-US>
+<zh-TW>
+v1.4.0
+
+• 新增：分享開啟 — 可從相簿或任何其他 App 直接分享圖片到 LockView，不必再自行選檔。
+• 修正：小於螢幕的圖片，左右兩側會被裁切。
+• 修正：放大後的圖片可能被拖曳到畫面外，且雙擊時會偏離原位放大。
+• 修正：錯誤訊息不再與畫面底部的按鈕重疊。
+</zh-TW>

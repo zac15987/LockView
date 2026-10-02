@@ -193,6 +193,9 @@ Custom ViewModel factories handle dependency injection:
 - **StateFlow**: Reactive state management with automatic UI updates
 - **DataStore**: Type-safe preference storage replacing SharedPreferences
 
+### Play Store Release Notes
+Past Play Console "What's new" texts are archived in `release-notes/v<versionName>.txt` (en-US + zh-TW, 500 characters per language). Use them as the reference when writing the notes for a new release; format rules are in `release-notes/README.md`.
+
 ### Permissions Configuration
 The app declares **no runtime permissions** in `AndroidManifest.xml`. Image access is granted per-URI by the Storage Access Framework when the user picks a file via `ActivityResultContracts.OpenDocument()`, or by the sending app's `FLAG_GRANT_READ_URI_PERMISSION` when an image is shared in via `ACTION_SEND`. Both grants are session-scoped and not persisted across app restarts — `takePersistableUriPermission` is deliberately never called (shared URIs generally don't support it).
 
