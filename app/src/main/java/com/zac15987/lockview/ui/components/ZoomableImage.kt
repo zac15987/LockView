@@ -1,6 +1,5 @@
 package com.zac15987.lockview.ui.components
 
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,13 +30,50 @@ fun ImageViewer(
     onSuccess: (IntSize) -> Unit,
     onError: () -> Unit,
     modifier: Modifier = Modifier,
-    lockedControlsEnabled: Boolean = false
+    lockedControlsEnabled: Boolean = false,
+    minVisibleFraction: Float = state.minVisibleFraction
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(minVisibleFraction) {
+        state.updateMinVisibleFraction(minVisibleFraction)
+    }
     
+    // Gestures are detected on this untransformed Box rather than on the image itself, so all
+    // pointer positions are screen coordinates. On the image (after graphicsLayer) they would be
+    // in the transformed space, which shifts under the fingers as the transform changes.
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(state.isLocked, lockedControlsEnabled) {
+                if (!state.isLocked || lockedControlsEnabled) {
+                    detectTransformGestures { centroid, pan, zoom, rotation ->
+                        coroutineScope.launch {
+                            // Apply rotation only if rotation mode enabled
+                            val rotationDelta = if (state.isRotationEnabled) rotation else 0f
+                            state.transform(centroid, pan, zoom, rotationDelta)
+                        }
+                    }
+                }
+            }
+            .pointerInput(state.isLocked, lockedControlsEnabled) {
+                if (!state.isLocked || lockedControlsEnabled) {
+                    detectTapGestures(
+                        onDoubleTap = { tapOffset ->
+                            coroutineScope.launch {
+                                if (abs(state.scale - state.fitScale) < 0.1f) {
+                                    // Zoom in to double tap location
+                                    state.animateToBig(tapOffset)
+                                } else {
+                                    // Zoom out to fit-to-screen
+                                    state.animateToStandard()
+                                }
+                            }
+                        }
+                    )
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
@@ -57,57 +93,6 @@ fun ImageViewer(
                     translationX = state.offset.x
                     translationY = state.offset.y
                     rotationZ = state.rotation
-                }
-                .pointerInput(state.isLocked, state.isRotationEnabled, lockedControlsEnabled) {
-                    val gesturesAllowed = !state.isLocked || lockedControlsEnabled
-                    if (gesturesAllowed) {
-                        detectZoomAndRotation { centroid, zoom, rotation ->
-                            coroutineScope.launch {
-                                // Apply zoom
-                                if (zoom != 1f) {
-                                    val newScale = (state.scale * zoom).coerceIn(state.minScale, state.maxScale)
-                                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
-                                    val centroidOffset = centroid - centerOffset
-                                    val scaleDelta = newScale - state.scale
-                                    val newOffset = state.offset - centroidOffset * scaleDelta / state.scale
-                                    state.updateScale(newScale)
-                                    state.updateOffset(newOffset)
-                                }
-
-                                // Apply rotation only if rotation mode enabled
-                                if (state.isRotationEnabled && rotation != 0f) {
-                                    val newRotation = state.rotation + rotation
-                                    state.updateRotation(newRotation)
-                                }
-                            }
-                        }
-                    }
-                }
-                .pointerInput(state.isLocked, lockedControlsEnabled) {
-                    if (!state.isLocked || lockedControlsEnabled) {
-                        detectDragGestures { _, dragAmount ->
-                            coroutineScope.launch {
-                                state.drag(dragAmount)
-                            }
-                        }
-                    }
-                }
-                .pointerInput(state.isLocked, lockedControlsEnabled) {
-                    if (!state.isLocked || lockedControlsEnabled) {
-                        detectTapGestures(
-                            onDoubleTap = { tapOffset ->
-                                coroutineScope.launch {
-                                    if (abs(state.scale - state.fitScale) < 0.1f) {
-                                        // Zoom in to double tap location
-                                        state.animateToBig(tapOffset)
-                                    } else {
-                                        // Zoom out to fit-to-screen
-                                        state.animateToStandard()
-                                    }
-                                }
-                            }
-                        )
-                    }
                 },
             // Fit does the fit-to-screen sizing; graphicsLayer's scale is relative to that
             // (see ImageViewerState.fitScale), so the two must not both apply a fit factor.

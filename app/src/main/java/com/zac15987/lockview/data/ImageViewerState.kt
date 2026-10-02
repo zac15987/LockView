@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import com.zac15987.lockview.data.panrange.PanRangeRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlin.math.cos
@@ -53,6 +54,10 @@ class ImageViewerState(
     var error: String? by mutableStateOf(null)
     var toastMessage: String? by mutableStateOf(null)
     var isRotationEnabled: Boolean by mutableStateOf(false)
+
+    // Smallest share of the image (per axis) that panning must leave on screen
+    var minVisibleFraction by mutableFloatStateOf(PanRangeRepository.DEFAULT_PERCENT / 100f)
+        private set
     
     // Computed properties
     val imageAspectRatio: Float
@@ -141,6 +146,34 @@ class ImageViewerState(
         _offset.snapTo(constrainedOffset)
     }
     
+    // Combined pinch/pan/rotate step. centroid and pan are in screen (layout) coordinates, not
+    // the transformed image's. The image point under the previous centroid (centroid - pan) is
+    // kept under the current centroid: with d = point - layout centre and k = scale ratio,
+    // newOffset = dCurrent - R(rotationDelta) * k * (dPrevious - offset).
+    suspend fun transform(centroid: Offset, pan: Offset, zoom: Float, rotationDelta: Float) {
+        val newScale = (scale * zoom).coerceIn(minScale, maxScale)
+        val k = if (scale > 0f) newScale / scale else 1f
+
+        val layoutCenter = Offset(layoutSize.width / 2f, layoutSize.height / 2f)
+        val current = centroid - layoutCenter
+        val previous = current - pan
+        val newOffset = current - (previous - offset).rotateBy(rotationDelta) * k
+
+        _scale.snapTo(newScale)
+        if (rotationDelta != 0f) {
+            _rotation.snapTo((rotation + rotationDelta) % 360f)
+        }
+        updateOffset(newOffset)
+    }
+
+    private fun Offset.rotateBy(degrees: Float): Offset {
+        if (degrees == 0f) return this
+        val radians = Math.toRadians(degrees.toDouble())
+        val cosR = cos(radians).toFloat()
+        val sinR = sin(radians).toFloat()
+        return Offset(x * cosR - y * sinR, x * sinR + y * cosR)
+    }
+
     // Drag functionality - screen-relative panning with rotation compensation
     suspend fun drag(dragAmount: Offset) {
         val rotationRadians = Math.toRadians(rotation.toDouble())
@@ -156,6 +189,14 @@ class ImageViewerState(
         val scaleFactor = if (fitScale > 0f) scale / fitScale else 1f
         val newOffset = offset + transformedDrag * scaleFactor
         updateOffset(newOffset)
+    }
+
+    // Re-clamps the current offset, so a tighter range takes effect immediately instead of
+    // making the image jump on the next touch
+    suspend fun updateMinVisibleFraction(fraction: Float) {
+        if (fraction == minVisibleFraction) return
+        minVisibleFraction = fraction
+        updateOffset(offset)
     }
 
     // Rotation functionality
@@ -191,8 +232,20 @@ class ImageViewerState(
         val scaledImageWidth = contentWidth * currentScale
         val scaledImageHeight = contentHeight * currentScale
         
-        val maxOffsetX = max(0f, (scaledImageWidth - layoutSize.width) / 2f)
-        val maxOffsetY = max(0f, (scaledImageHeight - layoutSize.height) / 2f)
+        // Per axis, the larger of:
+        //  - scaled / 2: any point of the image can be brought to the layout centre, so an area
+        //    near the image edge can be centred instead of stopping at the screen edge
+        //  - layout / 2 + scaled * (1/2 - minVisibleFraction): the image can be pushed off
+        //    screen until only minVisibleFraction of it is left inside the layout
+        // Both are continuous in scale, so zooming never makes the offset jump.
+        val maxOffsetX = max(
+            scaledImageWidth / 2f,
+            layoutSize.width / 2f + scaledImageWidth * (0.5f - minVisibleFraction)
+        )
+        val maxOffsetY = max(
+            scaledImageHeight / 2f,
+            layoutSize.height / 2f + scaledImageHeight * (0.5f - minVisibleFraction)
+        )
         
         return Bounds(
             left = -maxOffsetX,

@@ -81,4 +81,8 @@
     
     <!-- Accessibility -->
     <string name="zoomable_image">可縮放圖片</string>
+    <!-- Pan range -->
+    <string name="pan_range">平移範圍</string>
+    <string name="pan_range_description">拖曳圖片時，至少要留在畫面上的圖片比例。數值越小，圖片可以移出畫面越多。雙擊可讓圖片重新置中。</string>
+    <string name="pan_range_value">至少保留 %1$d%% 在畫面上</string>
 </resources>

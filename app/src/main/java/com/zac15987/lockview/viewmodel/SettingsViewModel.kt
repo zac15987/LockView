@@ -6,6 +6,7 @@ import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.language.LanguageRepository
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsPreference
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsRepository
+import com.zac15987.lockview.data.panrange.PanRangeRepository
 import com.zac15987.lockview.data.puremode.PureModePreference
 import com.zac15987.lockview.data.puremode.PureModeRepository
 import com.zac15987.lockview.data.theme.ThemePreference
@@ -20,7 +21,8 @@ class SettingsViewModel(
     private val themeRepository: ThemeRepository,
     private val languageRepository: LanguageRepository,
     private val lockedControlsRepository: LockedControlsRepository,
-    private val pureModeRepository: PureModeRepository
+    private val pureModeRepository: PureModeRepository,
+    private val panRangeRepository: PanRangeRepository
 ) : ViewModel() {
     
     val themePreference: StateFlow<ThemePreference> = themeRepository.themePreference
@@ -51,6 +53,13 @@ class SettingsViewModel(
             initialValue = PureModePreference.DISABLED
         )
 
+    val panMinVisiblePercent: StateFlow<Int> = panRangeRepository.minVisiblePercent
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = PanRangeRepository.DEFAULT_PERCENT
+        )
+
     private val _languageChanged = MutableStateFlow(false)
     val languageChanged: StateFlow<Boolean> = _languageChanged.asStateFlow()
     
@@ -76,6 +85,12 @@ class SettingsViewModel(
     fun setPureModePreference(preference: PureModePreference) {
         viewModelScope.launch {
             pureModeRepository.setPureModePreference(preference)
+        }
+    }
+
+    fun setPanMinVisiblePercent(percent: Int) {
+        viewModelScope.launch {
+            panRangeRepository.setMinVisiblePercent(percent)
         }
     }
 

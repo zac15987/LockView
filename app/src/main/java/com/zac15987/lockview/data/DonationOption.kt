@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.zac15987.lockview.R
 
 data class DonationOption(
-    @StringRes val displayNameResId: Int,
+    @param:StringRes val displayNameResId: Int,
     val url: String
 ) {
     companion object {

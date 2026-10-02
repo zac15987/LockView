@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zac15987.lockview.data.DonationOption
 import com.zac15987.lockview.data.language.LanguagePreference
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsPreference
+import com.zac15987.lockview.data.panrange.PanRangeRepository
 import com.zac15987.lockview.data.puremode.PureModePreference
 import com.zac15987.lockview.data.theme.ThemePreference
 import com.zac15987.lockview.ui.components.AboutDialog
@@ -44,6 +45,7 @@ import com.zac15987.lockview.ui.components.LicensesDialog
 import com.zac15987.lockview.MainActivity
 import com.zac15987.lockview.viewmodel.ImageViewerViewModel
 import com.zac15987.lockview.viewmodel.SettingsViewModel
+import kotlin.math.roundToInt
 
 private fun Context.findActivity(): ComponentActivity? {
     var context = this
@@ -67,6 +69,7 @@ fun ImageViewerScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showLockSettingsDialog by remember { mutableStateOf(false) }
+    var showPanRangeDialog by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
     
     // Handle system bars visibility based on lock state
@@ -98,6 +101,8 @@ fun ImageViewerScreen(
     // Mirrors the condition used inside ImageViewer's gesture detectors.
     val gesturesAllowed = !state.isLocked || lockedControlsEnabled
 
+    val panMinVisiblePercent by settingsViewModel.panMinVisiblePercent.collectAsStateWithLifecycle()
+
     val pureModePreference by settingsViewModel.pureModePreference.collectAsStateWithLifecycle()
     // In pure mode, hide every UI element (buttons + lock indicator) while the image is locked
     val hideAllUi = state.isLocked && pureModePreference == PureModePreference.ENABLED
@@ -118,7 +123,8 @@ fun ImageViewerScreen(
                     viewModel.setLoading(false)
                 },
                 onError = { viewModel.setError(failedToLoadImageText) },
-                lockedControlsEnabled = lockedControlsEnabled
+                lockedControlsEnabled = lockedControlsEnabled,
+                minVisibleFraction = panMinVisiblePercent / 100f
             )
         } else {
             // Empty state
@@ -352,6 +358,13 @@ fun ImageViewerScreen(
                         }
                     )
                     DropdownMenuItem(
+                        text = { Text(stringResource(R.string.pan_range)) },
+                        onClick = {
+                            showMenu = false
+                            showPanRangeDialog = true
+                        }
+                    )
+                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.donate)) },
                         onClick = {
                             showMenu = false
@@ -531,6 +544,48 @@ fun ImageViewerScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLockSettingsDialog = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
+    // Pan range dialog: how much of the image panning must leave on screen
+    if (showPanRangeDialog) {
+        // Local while dragging; saved once the slider is released
+        var sliderPercent by remember { mutableFloatStateOf(panMinVisiblePercent.toFloat()) }
+        val min = PanRangeRepository.MIN_PERCENT
+        val max = PanRangeRepository.MAX_PERCENT
+
+        AlertDialog(
+            onDismissRequest = { showPanRangeDialog = false },
+            title = { Text(stringResource(R.string.pan_range)) },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.pan_range_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.pan_range_value, sliderPercent.roundToInt()),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Slider(
+                        value = sliderPercent,
+                        onValueChange = { sliderPercent = it },
+                        onValueChangeFinished = {
+                            settingsViewModel.setPanMinVisiblePercent(sliderPercent.roundToInt())
+                        },
+                        valueRange = min.toFloat()..max.toFloat(),
+                        // Intermediate stops between min and max, one per STEP_PERCENT
+                        steps = (max - min) / PanRangeRepository.STEP_PERCENT - 1
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPanRangeDialog = false }) {
                     Text(stringResource(R.string.close))
                 }
             }

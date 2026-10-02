@@ -81,4 +81,8 @@
     
     <!-- Accessibility -->
     <string name="zoomable_image">Zoomable image</string>
+    <!-- Pan range -->
+    <string name="pan_range">Pan Range</string>
+    <string name="pan_range_description">How much of the image must stay on screen when you drag it. A lower value lets you move the image further off screen. Double-tap to recenter it.</string>
+    <string name="pan_range_value">Keep at least %1$d%% on screen</string>
 </resources>

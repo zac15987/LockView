@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zac15987.lockview.data.language.LanguageRepository
 import com.zac15987.lockview.data.lockedcontrols.LockedControlsRepository
+import com.zac15987.lockview.data.panrange.PanRangeRepository
 import com.zac15987.lockview.data.puremode.PureModeRepository
 import com.zac15987.lockview.data.theme.ThemeRepository
 import com.zac15987.lockview.ui.screens.ImageViewerScreen
@@ -106,8 +107,9 @@ class MainActivity : ComponentActivity() {
             val themeRepository = ThemeRepository(this@MainActivity)
             val lockedControlsRepository = LockedControlsRepository(this@MainActivity)
             val pureModeRepository = PureModeRepository(this@MainActivity)
+            val panRangeRepository = PanRangeRepository(this@MainActivity)
             val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModelFactory(themeRepository, languageRepository, lockedControlsRepository, pureModeRepository)
+                factory = SettingsViewModelFactory(themeRepository, languageRepository, lockedControlsRepository, pureModeRepository, panRangeRepository)
             )
             val themePreference = settingsViewModel.themePreference.collectAsStateWithLifecycle()
             val languageChanged = settingsViewModel.languageChanged.collectAsStateWithLifecycle()
