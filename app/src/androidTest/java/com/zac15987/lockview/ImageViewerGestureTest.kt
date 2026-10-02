@@ -184,6 +184,31 @@ class ImageViewerGestureTest {
     }
 
     @Test
+    fun zoomedOutBelowScreenSize_oneFingerPanStillMoves() {
+        // Pinch in to ~0.6x
+        startTwoFingers(center, 300f)
+        node.performTouchInput { repeat(25) { i -> place(center, 300f - (i + 1) * 5f, 0f) } }
+        node.performTouchInput { up(0); up(1) }
+        rule.waitForIdle()
+        assertTrue("scale ${state.scale}", state.scale < 0.8f)
+
+        val from = center
+        node.performTouchInput {
+            down(0, from)
+            repeat(5) { i -> moveTo(0, from + Offset((i + 1) * 6f, 0f)) }
+        }
+        rule.waitForIdle()
+        val grabbed = from + Offset(30f, 0f)
+        val anchor = toLocal(grabbed)
+        node.performTouchInput {
+            repeat(20) { i -> moveTo(0, grabbed + Offset((i + 1) * 5f, (i + 1) * 8f)) }
+        }
+        rule.waitForIdle()
+        assertNear(grabbed + Offset(100f, 160f), toScreen(anchor))
+        node.performTouchInput { up(0) }
+    }
+
+    @Test
     fun rotateWithRotationEnabled_pointStaysUnderFingers() {
         state.isRotationEnabled = true
         rule.waitForIdle()

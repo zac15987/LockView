@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -219,8 +220,11 @@ class ImageViewerState(
         val scaledImageWidth = contentWidth * currentScale
         val scaledImageHeight = contentHeight * currentScale
         
-        val maxOffsetX = max(0f, (scaledImageWidth - layoutSize.width) / 2f)
-        val maxOffsetY = max(0f, (scaledImageHeight - layoutSize.height) / 2f)
+        // Per axis: larger than the layout -> the image edge can go at most to the layout edge;
+        // smaller (zoomed out, or the letterboxed axis) -> it can move as long as it stays fully
+        // inside the layout. Both are |scaled - layout| / 2.
+        val maxOffsetX = abs(scaledImageWidth - layoutSize.width) / 2f
+        val maxOffsetY = abs(scaledImageHeight - layoutSize.height) / 2f
         
         return Bounds(
             left = -maxOffsetX,

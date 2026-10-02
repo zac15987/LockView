@@ -95,4 +95,16 @@ class ImageViewerStateTransformTest {
         // Image is 2000px wide at 2x on a 1000px layout -> at most 500px each way
         assertOffsetEquals(Offset(500f, 0f), state.offset)
     }
+
+    @Test
+    fun zoomedOutImageCanMoveButStaysOnScreen() = runBlocking {
+        state.transform(center, Offset.Zero, 0.6f, 0f)
+
+        state.transform(center + Offset(-100f, 150f), Offset(-100f, 150f), 1f, 0f)
+        assertOffsetEquals(Offset(-100f, 150f), state.offset)
+
+        state.transform(center + Offset(5000f, -5000f), Offset(5000f, -5000f), 1f, 0f)
+        // 600x1200 image on a 1000x2000 layout -> at most 200px / 400px each way
+        assertOffsetEquals(Offset(200f, -400f), state.offset)
+    }
 }
