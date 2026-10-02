@@ -5,7 +5,7 @@ import com.zac15987.lockview.R
 
 enum class LanguagePreference(
     val localeCode: String,
-    @StringRes val displayNameResId: Int
+    @param:StringRes val displayNameResId: Int
 ) {
     SYSTEM("", R.string.language_system),
     ENGLISH("en", R.string.language_english),
